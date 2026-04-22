@@ -26,9 +26,6 @@ const textureCache = new Map<number, Uint8Array>();
 // Cache for loaded sprite textures
 const spriteCache = new Map<string, Uint8Array>();
 
-// Preloaded image data cache
-const imageDataCache = new Map<string, ImageData>();
-
 // ---- Utility ----
 function clamp(v: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, v));
@@ -1025,6 +1022,7 @@ function genWeaponSprite(weaponId: string): Uint8Array {
       const gunDark = '#202020';
       const gunHighlight = '#4a4a4a';
       const gripWood = '#5a3a18';
+      const gripDark = '#3a2510';
       
       // Main receiver/body
       ctx.fillStyle = gunMetal;
