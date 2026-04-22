@@ -32,6 +32,7 @@ import {
   getItemSprite,
   getPropSprite,
   getWeaponSprite,
+  initializeSprites,
 } from './textures';
 import { PlayerController } from './player';
 import { EnemyAI } from './enemy';
@@ -177,14 +178,16 @@ export class GameEngine {
   }
 
   // ---- Flow ----
-  startGame() {
+  async startGame() {
+    await initializeSprites();
     this.audio.init();
     this.audio.resume();
     this.currentLevelIdx = 0;
     this.screen = GameScreen.BRIEFING;
   }
 
-  continueGame() {
+  async continueGame() {
+    await initializeSprites();
     this.audio.init();
     this.audio.resume();
     this.currentLevelIdx = Math.min(this.completedLevels.length, LEVELS.length - 1);
