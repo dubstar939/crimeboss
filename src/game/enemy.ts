@@ -7,6 +7,15 @@ import { Enemy, EnemyState, Vec2, isWall } from './types';
 import { ENEMY_DEFS, BOSS_DEFS } from './data';
 import { AudioManager } from './audio';
 
+const PATROL_DURATION = 3;
+const ALERT_DURATION = 0.5;
+const ENEMY_ALERT_RANGE = 12;
+const ENEMY_CHASE_RANGE = 15;
+const ENEMY_LOST_TARGET_RANGE = 18;
+const STRAFE_DISTANCE = 5;
+const PATROL_DISTANCE_MIN = 2;
+const PATROL_DISTANCE_MAX = 4;
+
 export class EnemyAI {
   enemies: Enemy[] = [];
 
@@ -40,7 +49,7 @@ export class EnemyAI {
 
   private randomPatrolPoint(cx: number, cy: number): Vec2 {
     const angle = Math.random() * Math.PI * 2;
-    const dist = 2 + Math.random() * 4;
+    const dist = PATROL_DISTANCE_MIN + Math.random() * (PATROL_DISTANCE_MAX - PATROL_DISTANCE_MIN);
     return { x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist };
   }
 
@@ -67,14 +76,14 @@ export class EnemyAI {
       switch (e.state) {
         case EnemyState.IDLE:
           e.patrolTimer += dt;
-          if (e.patrolTimer > 3) {
+          if (e.patrolTimer > PATROL_DURATION) {
             e.patrolTarget = this.randomPatrolPoint(e.x, e.y);
             e.patrolTimer = 0;
             e.state = EnemyState.PATROL;
           }
-          if (hasLOS && dist < 12) {
+          if (hasLOS && dist < ENEMY_ALERT_RANGE) {
             e.state = EnemyState.ALERT;
-            e.alertTimer = 0.5;
+            e.alertTimer = ALERT_DURATION;
           }
           break;
 
@@ -86,9 +95,9 @@ export class EnemyAI {
             e.state = EnemyState.IDLE;
             e.patrolTimer = 0;
           }
-          if (hasLOS && dist < 14) {
+          if (hasLOS && dist < ENEMY_CHASE_RANGE) {
             e.state = EnemyState.ALERT;
-            e.alertTimer = 0.5;
+            e.alertTimer = ALERT_DURATION;
           }
           break;
 
@@ -98,7 +107,7 @@ export class EnemyAI {
           if (e.alertTimer <= 0) {
             if (hasLOS && dist < e.def.range) {
               e.state = EnemyState.ATTACK;
-            } else if (dist < 15) {
+            } else if (dist < ENEMY_CHASE_RANGE) {
               e.state = EnemyState.CHASE;
             } else {
               e.state = EnemyState.IDLE;
@@ -110,7 +119,7 @@ export class EnemyAI {
           e.angle = angleToPlayer;
           if (hasLOS && dist < e.def.range) {
             e.state = EnemyState.ATTACK;
-          } else if (!hasLOS || dist > 18) {
+          } else if (!hasLOS || dist > ENEMY_LOST_TARGET_RANGE) {
             e.state = EnemyState.ALERT;
             e.alertTimer = 2;
           } else {
@@ -131,8 +140,8 @@ export class EnemyAI {
             e.justAttacked = true;
             e.fireTimer = 1 / e.def.fireRate;
           }
-          // Strafe
-          if (dist < 5) {
+          // Strafe when close to player
+          if (dist < STRAFE_DISTANCE) {
             const strafeAngle = angleToPlayer + Math.PI / 2 * (Math.sin(Date.now() * 0.003) > 0 ? 1 : -1);
             const sx = e.x + Math.cos(strafeAngle) * e.def.speed * dt * 0.5;
             const sy = e.y + Math.sin(strafeAngle) * e.def.speed * dt * 0.5;
