@@ -846,7 +846,18 @@ export class GameEngine {
     this.ctx.textAlign = 'center';
     this.ctx.font = 'bold 12px monospace';
     this.ctx.fillStyle = '#dddddd';
-    this.ctx.fillText(`${weapon.icon} ${weapon.name}`, RENDER_WIDTH / 2, RENDER_HEIGHT - 14);
+    // Handle both emoji strings and image sprites for weapon icon
+    if (typeof weapon.icon === 'string') {
+      this.ctx.fillText(`${weapon.icon} ${weapon.name}`, RENDER_WIDTH / 2, RENDER_HEIGHT - 14);
+    } else if (weapon.icon instanceof HTMLImageElement && weapon.icon.complete) {
+      // Draw weapon sprite image centered above name
+      const imgWidth = 48;
+      const imgHeight = 32;
+      this.ctx.drawImage(weapon.icon, RENDER_WIDTH / 2 - imgWidth / 2, RENDER_HEIGHT - 50, imgWidth, imgHeight);
+      this.ctx.fillText(weapon.name, RENDER_WIDTH / 2, RENDER_HEIGHT - 14);
+    } else {
+      this.ctx.fillText(weapon.name, RENDER_WIDTH / 2, RENDER_HEIGHT - 14);
+    }
 
     this.ctx.textAlign = 'left';
     this.ctx.font = '11px monospace';
