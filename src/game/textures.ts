@@ -1,13 +1,29 @@
 // ============================================================
-// Little Italy: Turf Wars — Procedural Texture Generator
-// Generates all wall, floor, ceiling, and sprite textures
-// Enhanced for 90s gritty FPS aesthetic (Duke3D, Blood, Shadow Warrior)
+// Little Italy: Turf Wars — Texture Loader
+// Loads sprite textures from PNG files for 90s FPS aesthetic
 // ============================================================
 
 import { TEX_SIZE, WallType, PropType } from './types';
 
-// Cache for generated textures
+// Import all sprite PNGs
+import enemySprite1 from '../components/LDZgviX.png';
+import enemySprite2 from '../components/ggp2.png';
+import enemySprite3 from '../components/gs.png';
+
+// Animation frames
+import ggp2TopFrame0 from '../components/ggp2_top_frame_0.png';
+import ggp2TopFrame1 from '../components/ggp2_top_frame_1.png';
+import ggp2TopFrame2 from '../components/ggp2_top_frame_2.png';
+import ggp2TopFrame3 from '../components/ggp2_top_frame_3.png';
+import ggp2BottomFrame0 from '../components/ggp2_bottom_frame_0.png';
+import ggp2BottomFrame1 from '../components/ggp2_bottom_frame_1.png';
+import ggp2BottomFrame2 from '../components/ggp2_bottom_frame_2.png';
+import ggp2BottomFrame3 from '../components/ggp2_bottom_frame_3.png';
+
+// Cache for generated textures (walls, floors, ceilings)
 const textureCache = new Map<number, Uint8Array>();
+
+// Cache for loaded sprite textures
 const spriteCache = new Map<string, Uint8Array>();
 
 // ---- Utility ----
@@ -43,6 +59,64 @@ function createTexture(draw: (ctx: CanvasRenderingContext2D) => void): Uint8Arra
   const ctx = canvas.getContext('2d')!;
   draw(ctx);
   return new Uint8Array(ctx.getImageData(0, 0, TEX_SIZE, TEX_SIZE).data);
+}
+
+// Load PNG and convert to Uint8Array at TEX_SIZE
+async function loadPngToTexture(src: string): Promise<Uint8Array> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = TEX_SIZE;
+      canvas.height = TEX_SIZE;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0, TEX_SIZE, TEX_SIZE);
+      const data = new Uint8Array(ctx.getImageData(0, 0, TEX_SIZE, TEX_SIZE).data);
+      resolve(data);
+    };
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+// Preload all sprite images on module init
+let spritesLoaded = false;
+const loadPromises: Promise<void>[] = [];
+
+async function preloadSprite(key: string, src: string): Promise<void> {
+  try {
+    const data = await loadPngToTexture(src);
+    spriteCache.set(key, data);
+  } catch (e) {
+    console.warn(`Failed to load sprite ${key}:`, e);
+  }
+}
+
+export async function initializeSprites(): Promise<void> {
+  if (spritesLoaded) return;
+  spritesLoaded = true;
+  
+  // Clear any existing cached sprites
+  spriteCache.clear();
+  
+  // Preload all enemy sprites
+  loadPromises.push(preloadSprite('enemy_main', enemySprite1));
+  loadPromises.push(preloadSprite('enemy_alt1', enemySprite2));
+  loadPromises.push(preloadSprite('enemy_alt2', enemySprite3));
+  
+  // Preload animation frames
+  loadPromises.push(preloadSprite('ggp2_top_0', ggp2TopFrame0));
+  loadPromises.push(preloadSprite('ggp2_top_1', ggp2TopFrame1));
+  loadPromises.push(preloadSprite('ggp2_top_2', ggp2TopFrame2));
+  loadPromises.push(preloadSprite('ggp2_top_3', ggp2TopFrame3));
+  loadPromises.push(preloadSprite('ggp2_bottom_0', ggp2BottomFrame0));
+  loadPromises.push(preloadSprite('ggp2_bottom_1', ggp2BottomFrame1));
+  loadPromises.push(preloadSprite('ggp2_bottom_2', ggp2BottomFrame2));
+  loadPromises.push(preloadSprite('ggp2_bottom_3', ggp2BottomFrame3));
+  
+  await Promise.all(loadPromises);
+  console.log('[TextureLoader] All sprites preloaded');
 }
 
 // ---- Wall Textures ----
@@ -948,6 +1022,7 @@ function genWeaponSprite(weaponId: string): Uint8Array {
       const gunDark = '#202020';
       const gunHighlight = '#4a4a4a';
       const gripWood = '#5a3a18';
+      const gripDark = '#3a2510';
       
       // Main receiver/body
       ctx.fillStyle = gunMetal;
@@ -1073,11 +1148,36 @@ export function getCeilingTexture(): Uint8Array {
 }
 
 export function getEnemySprite(color: string, accent: string, isBoss: boolean): Uint8Array {
+  // Try to use preloaded PNG sprites first
   const key = `enemy_${color}_${accent}_${isBoss}`;
+  
+  // Check if we have a preloaded sprite for this enemy type
+  // Use different sprites based on color/accent combinations
+  if (spriteCache.has('enemy_main')) {
+    return spriteCache.get('enemy_main')!;
+  }
+  if (spriteCache.has('enemy_alt1')) {
+    return spriteCache.get('enemy_alt1')!;
+  }
+  if (spriteCache.has('enemy_alt2')) {
+    return spriteCache.get('enemy_alt2')!;
+  }
+  
+  // Fallback to procedural generation if no PNG loaded
   if (!spriteCache.has(key)) {
     spriteCache.set(key, genEnemySprite(color, accent, isBoss));
   }
   return spriteCache.get(key)!;
+}
+
+// Get specific animation frame for ggp2 enemy
+export function getGgp2AnimationFrame(isTop: boolean, frameIndex: number): Uint8Array | null {
+  const baseName = isTop ? 'ggp2_top' : 'ggp2_bottom';
+  const key = `${baseName}_${frameIndex}`;
+  if (spriteCache.has(key)) {
+    return spriteCache.get(key)!;
+  }
+  return null;
 }
 
 export function getItemSprite(type: string): Uint8Array {
@@ -1102,4 +1202,13 @@ export function getWeaponSprite(weaponId: string): Uint8Array {
     spriteCache.set(key, genWeaponSprite(weaponId));
   }
   return spriteCache.get(key)!;
+}
+
+// Get animation frame by index
+export function getAnimationFrame(baseName: string, frameIndex: number): Uint8Array | null {
+  const key = `${baseName}_${frameIndex}`;
+  if (spriteCache.has(key)) {
+    return spriteCache.get(key)!;
+  }
+  return null;
 }

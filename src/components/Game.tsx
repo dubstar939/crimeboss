@@ -43,22 +43,20 @@ export default function Game() {
     };
   }, [syncScreen]);
 
-  const handleNewGame = () => {
+  const handleNewGame = async () => {
     const engine = engineRef.current;
     if (!engine) return;
-    engine.audio.init();
-    engine.audio.resume();
+    await engine.startGame();
     engine.loadLevel(0);
     engine.screen = GameScreen.PLAYING;
     canvasRef.current?.requestPointerLock();
     syncScreen();
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     const engine = engineRef.current;
     if (!engine) return;
-    engine.audio.init();
-    engine.audio.resume();
+    await engine.continueGame();
     const nextLevel = engine.completedLevels.length;
     const lvl = nextLevel < LEVELS.length ? nextLevel : LEVELS.length - 1;
     engine.loadLevel(lvl);
