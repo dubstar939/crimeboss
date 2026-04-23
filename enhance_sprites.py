@@ -16,7 +16,7 @@ import os
 import math
 
 # Configuration
-COMPONENTS_DIR = '/crimeboss/src/components'
+COMPONENTS_DIR = 'crimeboss/src/components'
 LIGHT_DIRECTION = (-0.7, -0.7)  # Top-left lighting
 
 def load_sprite(path):
