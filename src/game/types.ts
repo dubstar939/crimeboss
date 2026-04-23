@@ -32,7 +32,7 @@ export interface WeaponDef {
   reloadTime: number;
   range: number;
   auto: boolean;
-  icon: string;
+  icon: string | any;
   unlockLevel: number;
 }
 
