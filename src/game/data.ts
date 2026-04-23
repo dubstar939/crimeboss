@@ -5,6 +5,31 @@
 
 import { WeaponDef, EnemyDef, LevelDef } from './types';
 
+// Weapon sprite imports (will be undefined if files don't exist yet)
+let knifeImg: HTMLImageElement | undefined;
+let pistolImg: HTMLImageElement | undefined;
+let revolverImg: HTMLImageElement | undefined;
+let tommygunImg: HTMLImageElement | undefined;
+let shotgunImg: HTMLImageElement | undefined;
+
+// Load weapon sprites at module initialization
+function loadWeaponSprite(name: string): HTMLImageElement | undefined {
+  try {
+    const img = new Image();
+    img.src = `/src/components/${name}.png`;
+    return img;
+  } catch {
+    return undefined;
+  }
+}
+
+// Initialize weapon images
+knifeImg = loadWeaponSprite('knife');
+pistolImg = loadWeaponSprite('pistol');
+revolverImg = loadWeaponSprite('revolver');
+tommygunImg = loadWeaponSprite('tommygun');
+shotgunImg = loadWeaponSprite('shotgun');
+
 // ============================================================
 // WEAPONS
 // ============================================================
@@ -19,7 +44,7 @@ export const WEAPONS: WeaponDef[] = [
     reloadTime: 0,
     range: 1.4,
     auto: false,
-    icon: '🔪',
+    icon: knifeImg || '🔪',
     unlockLevel: 0,
   },
   {
@@ -32,7 +57,7 @@ export const WEAPONS: WeaponDef[] = [
     reloadTime: 1.2,
     range: 20,
     auto: false,
-    icon: '🔫',
+    icon: pistolImg || '🔫',
     unlockLevel: 0,
   },
   {
@@ -45,7 +70,7 @@ export const WEAPONS: WeaponDef[] = [
     reloadTime: 1.8,
     range: 24,
     auto: false,
-    icon: '🎯',
+    icon: revolverImg || '🎯',
     unlockLevel: 0,
   },
   {
@@ -58,7 +83,7 @@ export const WEAPONS: WeaponDef[] = [
     reloadTime: 2.4,
     range: 18,
     auto: true,
-    icon: '💥',
+    icon: tommygunImg || '💥',
     unlockLevel: 1,
   },
   {
@@ -71,7 +96,7 @@ export const WEAPONS: WeaponDef[] = [
     reloadTime: 2,
     range: 10,
     auto: false,
-    icon: '💣',
+    icon: shotgunImg || '💣',
     unlockLevel: 2,
   },
 ];
