@@ -10,6 +10,13 @@ import enemySprite1 from '../components/LDZgviX.png';
 import enemySprite2 from '../components/ggp2.png';
 import enemySprite3 from '../components/gs.png';
 
+// Weapon sprites
+import knifeSprite from '../components/knife.png';
+import pistolSprite from '../components/revolver.png';
+import revolverSprite from '../components/revolver.png';
+import tommygunSprite from '../components/tommygun.png';
+import shotgunSprite from '../components/shotgun.png';
+
 // Animation frames
 import ggp2TopFrame0 from '../components/ggp2_top_frame_0.png';
 import ggp2TopFrame1 from '../components/ggp2_top_frame_1.png';
@@ -104,6 +111,13 @@ export async function initializeSprites(): Promise<void> {
   loadPromises.push(preloadSprite('enemy_main', enemySprite1));
   loadPromises.push(preloadSprite('enemy_alt1', enemySprite2));
   loadPromises.push(preloadSprite('enemy_alt2', enemySprite3));
+  
+  // Preload weapon sprites from PNGs
+  loadPromises.push(preloadSprite('weapon_knife', knifeSprite));
+  loadPromises.push(preloadSprite('weapon_pistol', pistolSprite));
+  loadPromises.push(preloadSprite('weapon_revolver', revolverSprite));
+  loadPromises.push(preloadSprite('weapon_tommygun', tommygunSprite));
+  loadPromises.push(preloadSprite('weapon_shotgun', shotgunSprite));
   
   // Preload animation frames
   loadPromises.push(preloadSprite('ggp2_top_0', ggp2TopFrame0));
@@ -1198,9 +1212,14 @@ export function getPropSprite(type: PropType): Uint8Array {
 
 export function getWeaponSprite(weaponId: string): Uint8Array {
   const key = `weapon_${weaponId}`;
-  if (!spriteCache.has(key)) {
-    spriteCache.set(key, genWeaponSprite(weaponId));
+  
+  // Try to use preloaded PNG sprite first
+  if (spriteCache.has(key)) {
+    return spriteCache.get(key)!;
   }
+  
+  // Fallback to procedural generation if no PNG loaded
+  spriteCache.set(key, genWeaponSprite(weaponId));
   return spriteCache.get(key)!;
 }
 
