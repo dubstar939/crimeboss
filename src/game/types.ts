@@ -262,5 +262,5 @@ export function isWall(map: number[][], x: number, y: number): boolean {
   const mx = Math.floor(x);
   const my = Math.floor(y);
   if (mx < 0 || mx >= (map[0]?.length ?? 0) || my < 0 || my >= map.length) return true;
-  return map[my][mx] !== WallType.EMPTY;
+  return map[my]?.[mx] !== WallType.EMPTY;
 }

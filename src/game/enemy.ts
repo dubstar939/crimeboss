@@ -222,7 +222,9 @@ export class EnemyAI {
     // Phase transitions
     const healthRatio = e.health / e.def.health;
     for (let i = 0; i < e.phaseThresholds.length; i++) {
-      if (healthRatio <= e.phaseThresholds[i] && e.bossPhase <= i) {
+      const threshold = e.phaseThresholds[i];
+      if (!threshold) continue;
+      if (healthRatio <= threshold && e.bossPhase <= i) {
         e.bossPhase = i + 1;
         // Enraged - faster fire rate
         e.def.fireRate *= 1.3;

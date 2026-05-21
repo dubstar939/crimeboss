@@ -109,7 +109,7 @@ export default function Game() {
     syncScreen();
   };
 
-  const level = LEVELS[levelIdx] || LEVELS[0];
+  const level = LEVELS[levelIdx] ?? LEVELS[0];
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden select-none" style={{ cursor: screen === GameScreen.PLAYING ? 'none' : 'default' }}>

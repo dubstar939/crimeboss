@@ -207,7 +207,7 @@ export class GameEngine {
     if (idx < 0 || idx >= LEVELS.length) return;
 
     this.currentLevelIdx = idx;
-    const level = LEVELS[idx];
+    const level = LEVELS[idx]!;
     this.map = parseMap(level);
 
     this.player = new PlayerController(level.playerStart.x, level.playerStart.y, level.playerAngle);
@@ -368,6 +368,7 @@ export class GameEngine {
 
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       const bullet = this.bullets[i];
+      if (!bullet) continue;
       const moveX = bullet.dx * bulletSpeed * dt;
       const moveY = bullet.dy * bulletSpeed * dt;
       bullet.x += moveX;
@@ -502,6 +503,7 @@ export class GameEngine {
   private updateParticles(dt: number) {
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const particle = this.particles[i];
+      if (!particle) continue;
       particle.x += particle.vx * dt;
       particle.y += particle.vy * dt;
       particle.life -= dt;
