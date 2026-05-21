@@ -259,6 +259,7 @@ export class AudioManager {
       if (!this.ctx || !this.musicGain) return;
       const t = this.ctx.currentTime;
       const chord = chords[chordIndex % chords.length];
+      if (!chord) return;
 
       // Bass note
       const bass = this.ctx.createOscillator();

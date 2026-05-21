@@ -35,9 +35,9 @@ export class PlayerController {
     };
 
     // Give starting weapons
-    this.addWeapon(WEAPONS[0]); // knife
-    this.addWeapon(WEAPONS[1]); // pistol
-    this.addWeapon(WEAPONS[2]); // revolver
+    this.addWeapon(WEAPONS[0]!); // knife
+    this.addWeapon(WEAPONS[1]!); // pistol
+    this.addWeapon(WEAPONS[2]!); // revolver
   }
 
   addWeapon(def: WeaponDef) {
@@ -55,7 +55,7 @@ export class PlayerController {
   }
 
   getCurrentWeapon(): WeaponState {
-    return this.state.weapons[this.state.currentWeaponIndex];
+    return this.state.weapons[this.state.currentWeaponIndex]!;
   }
 
   switchWeapon(index: number) {

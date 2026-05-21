@@ -96,10 +96,10 @@ export function castRay(
       side = 1;
     }
 
-    if (mapY < 0 || mapY >= map.length || mapX < 0 || mapX >= map[0].length) {
+    if (mapY < 0 || mapY >= map.length || mapX < 0 || mapX >= map[0]?.length) {
       hit = true;
       wallType = WallType.RED_BRICK;
-    } else if (map[mapY][mapX] !== WallType.EMPTY) {
+    } else if (map[mapY]?.[mapX] !== WallType.EMPTY) {
       hit = true;
       wallType = map[mapY][mapX] as WallType;
     }
