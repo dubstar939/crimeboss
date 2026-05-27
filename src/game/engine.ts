@@ -17,6 +17,7 @@ import {
   Item,
   Bullet,
   Particle,
+  ShellCasing,
   ScreenShake,
   GameSettings,
   LevelProp,
@@ -66,6 +67,7 @@ export class GameEngine {
   props: LevelProp[] = [];
   bullets: Bullet[] = [];
   particles: Particle[] = [];
+  shellCasings: ShellCasing[] = [];
   shake: ScreenShake = { intensity: 0, duration: 0, timer: 0 };
 
   currentLevelIdx = 0;
@@ -238,6 +240,7 @@ export class GameEngine {
 
     this.bullets = [];
     this.particles = [];
+    this.shellCasings = [];
     this.messageText = '';
     this.messageTimer = 0;
     this.audio.startMusic(level.musicTempo);
@@ -303,6 +306,7 @@ export class GameEngine {
     this.processPickups();
     this.checkExit();
     this.updateParticles(dt);
+    this.updateShellCasings(dt);
 
     if (this.shake.timer > 0) {
       this.shake.timer -= dt;
@@ -342,6 +346,9 @@ export class GameEngine {
       }
       return;
     }
+
+    // Spawn shell casing for firearms
+    this.spawnShellCasing(player.x, player.y, player.angle, weapon.id);
 
     const pellets = this.player.isShotgun() ? 6 : 1;
     for (let i = 0; i < pellets; i++) {
@@ -509,6 +516,80 @@ export class GameEngine {
     }
   }
 
+  private updateShellCasings(dt: number) {
+    const gravity = 15;
+    const friction = 0.92;
+    const floorZ = 0;
+
+    for (let i = this.shellCasings.length - 1; i >= 0; i--) {
+      const casing = this.shellCasings[i];
+      
+      // Update position
+      casing.x += casing.vx * dt;
+      casing.y += casing.vy * dt;
+      casing.z += casing.vz * dt;
+      
+      // Apply gravity to vertical velocity
+      casing.vz -= gravity * dt;
+      
+      // Bounce off floor
+      if (casing.z < floorZ) {
+        casing.z = floorZ;
+        casing.vz = -casing.vz * 0.4;
+        casing.vx *= friction;
+        casing.vy *= friction;
+        casing.rotSpeed *= 0.7;
+      }
+      
+      // Update rotation
+      casing.rotation += casing.rotSpeed * dt;
+      
+      // Decrease life
+      casing.life -= dt;
+      if (casing.life <= 0) {
+        this.shellCasings.splice(i, 1);
+      }
+    }
+  }
+
+  private spawnShellCasing(x: number, y: number, playerAngle: number, weaponId: string) {
+    // Shell ejection direction (to the right and slightly back from player)
+    const ejectAngle = playerAngle + Math.PI / 2 + (Math.random() - 0.5) * 0.3;
+    const ejectSpeed = 2 + Math.random() * 1.5;
+    
+    // Different shell sizes/colors for different weapons
+    let shellColor = '#d4af37'; // Brass
+    let shellLength = 0.08;
+    let shellRadius = 0.03;
+    
+    if (weaponId === 'shotgun') {
+      shellColor = '#c4a537';
+      shellLength = 0.15;
+      shellRadius = 0.05;
+    } else if (weaponId === 'tommygun') {
+      shellColor = '#d4af37';
+      shellLength = 0.06;
+      shellRadius = 0.025;
+    } else if (weaponId === 'revolver') {
+      shellColor = '#c9a938';
+      shellLength = 0.07;
+      shellRadius = 0.035;
+    }
+    
+    this.shellCasings.push({
+      x: x + Math.cos(playerAngle) * 0.3,
+      y: y + Math.sin(playerAngle) * 0.3,
+      z: 0.5, // Spawn at waist height
+      vx: Math.cos(ejectAngle) * ejectSpeed,
+      vy: Math.sin(ejectAngle) * ejectSpeed,
+      vz: 2 + Math.random(), // Initial upward velocity
+      rotation: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 15,
+      life: 8 + Math.random() * 4, // Despawn after 8-12 seconds
+      maxLife: 12,
+    });
+  }
+
   showMessage(text: string) {
     this.messageText = text;
     this.messageTimer = 2;
@@ -541,6 +622,7 @@ export class GameEngine {
 
     this.ctx.putImageData(this.imageData, shakeX, shakeY);
     this.renderParticles();
+    this.renderShellCasings();
     this.renderWeaponView();
     this.renderHUD();
     this.renderDebugOverlay();
@@ -768,6 +850,45 @@ export class GameEngine {
       this.ctx.fillRect(Math.floor(x), Math.floor(y), Math.ceil(size), Math.ceil(size));
     }
     this.ctx.globalAlpha = 1;
+  }
+
+  private renderShellCasings() {
+    if (!this.player) return;
+
+    const state = this.player.state;
+    const camera = buildCameraBasis(state.angle);
+    const invDet = 1 / (camera.planeX * camera.dirY - camera.dirX * camera.planeY);
+    const horizon = this.getHorizonY();
+
+    // Sort casings by distance for proper rendering order
+    const sortedCasings = [...this.shellCasings].map(casing => {
+      const dx = casing.x - state.x;
+      const dy = casing.y - state.y;
+      return { casing, dist: dx * dx + dy * dy };
+    }).sort((a, b) => b.dist - a.dist);
+
+    for (const { casing } of sortedCasings) {
+      const px = casing.x - state.x;
+      const py = casing.y - state.y;
+      const transformX = invDet * (camera.dirY * px - camera.dirX * py);
+      const transformY = invDet * (-camera.planeY * px + camera.planeX * py);
+      
+      if (transformY <= 0.05 || transformY > this.settings.renderDistance) continue;
+
+      const x = RENDER_WIDTH / 2 * (1 + transformX / transformY);
+      // Project shell height based on z position
+      const scale = 64 / transformY;
+      const y = horizon - casing.z * scale;
+      const size = Math.max(2, scale * 0.04);
+      
+      // Draw shell casing as small rotating rectangle
+      this.ctx.save();
+      this.ctx.translate(x, y);
+      this.ctx.rotate(casing.rotation);
+      this.ctx.fillStyle = '#d4af37'; // Brass color
+      this.ctx.fillRect(-size / 2, -size / 4, size, size / 2);
+      this.ctx.restore();
+    }
   }
 
   private renderWeaponView() {

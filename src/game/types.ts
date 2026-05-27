@@ -196,6 +196,19 @@ export interface Particle {
   size: number;
 }
 
+export interface ShellCasing {
+  x: number;
+  y: number;
+  z: number;
+  vx: number;
+  vy: number;
+  vz: number;
+  rotation: number;
+  rotSpeed: number;
+  life: number;
+  maxLife: number;
+}
+
 export interface ScreenShake {
   intensity: number;
   duration: number;
