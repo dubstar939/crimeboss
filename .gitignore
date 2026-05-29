@@ -1,3 +1,4 @@
 ```
-dist/
+# Image previews
+*.preview_crop.png
 ```
