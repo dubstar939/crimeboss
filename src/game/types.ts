@@ -21,6 +21,12 @@ export enum GameScreen {
   OPTIONS = 'OPTIONS',
 }
 
+// ---- Weapon Types (matching naming convention) ----
+export type WeaponType = 'pistol' | 'revolver' | 'shotgun' | 'smg' | 'tommygun' | 'knife' | 'sniper' | 'gs';
+
+// ---- Weapon Actions (matching naming convention) ----
+export type WeaponAction = 'idle' | 'raise' | 'lower' | 'fire' | 'reload' | 'melee' | 'inspect' | 'flash' | 'top' | 'bottom';
+
 // ---- Weapons ----
 export interface WeaponDef {
   id: string;
@@ -34,6 +40,15 @@ export interface WeaponDef {
   auto: boolean;
   icon: string | any;
   unlockLevel: number;
+  weaponType: WeaponType;
+  animFrames: {
+    idle: number;
+    raise: number;
+    lower: number;
+    fire: number;
+    reload: number;
+    melee: number;
+  };
 }
 
 export interface WeaponState extends WeaponDef {

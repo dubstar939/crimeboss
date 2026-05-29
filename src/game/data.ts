@@ -3,10 +3,11 @@
 // Weapons, enemies, bosses, and Wolf3D-style levels
 // ============================================================
 
-import { WeaponDef, EnemyDef, LevelDef } from './types';
+import { WeaponDef, EnemyDef, LevelDef, WeaponType } from './types';
 
 // ============================================================
 // WEAPONS
+// Naming convention: weapon_<type>_<action>_<frame>.png
 // ============================================================
 export const WEAPONS: WeaponDef[] = [
   {
@@ -21,6 +22,15 @@ export const WEAPONS: WeaponDef[] = [
     auto: false,
     icon: 'knifeImg',
     unlockLevel: 0,
+    weaponType: 'knife',
+    animFrames: {
+      idle: 3,
+      raise: 4,
+      lower: 4,
+      fire: 5,
+      reload: 0,
+      melee: 8,
+    },
   },
   {
     id: 'pistol',
@@ -34,6 +44,15 @@ export const WEAPONS: WeaponDef[] = [
     auto: false,
     icon: 'pistolImg',
     unlockLevel: 0,
+    weaponType: 'pistol',
+    animFrames: {
+      idle: 3,
+      raise: 5,
+      lower: 5,
+      fire: 4,
+      reload: 8,
+      melee: 0,
+    },
   },
   {
     id: 'revolver',
@@ -47,6 +66,15 @@ export const WEAPONS: WeaponDef[] = [
     auto: false,
     icon: 'revolverImg',
     unlockLevel: 0,
+    weaponType: 'revolver',
+    animFrames: {
+      idle: 3,
+      raise: 5,
+      lower: 5,
+      fire: 4,
+      reload: 10,
+      melee: 0,
+    },
   },
   {
     id: 'tommygun',
@@ -60,6 +88,15 @@ export const WEAPONS: WeaponDef[] = [
     auto: true,
     icon: 'tommygunImg',
     unlockLevel: 1,
+    weaponType: 'tommygun',
+    animFrames: {
+      idle: 3,
+      raise: 5,
+      lower: 5,
+      fire: 5,
+      reload: 10,
+      melee: 0,
+    },
   },
   {
     id: 'shotgun',
@@ -73,6 +110,15 @@ export const WEAPONS: WeaponDef[] = [
     auto: false,
     icon: 'shotgunImg',
     unlockLevel: 2,
+    weaponType: 'shotgun',
+    animFrames: {
+      idle: 3,
+      raise: 5,
+      lower: 5,
+      fire: 4,
+      reload: 12,
+      melee: 0,
+    },
   },
 ];
 
