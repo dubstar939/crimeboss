@@ -1,16 +1,18 @@
 // ============================================================
 // Little Italy: Turf Wars — Texture Loader
 // Loads sprite textures from PNG files for 90s FPS aesthetic
+// Supports multi-frame weapon animations per style guide
+// Naming convention: weapon_<type>_<action>_<frame>.png
 // ============================================================
 
-import { TEX_SIZE, WallType, PropType } from './types';
+import { TEX_SIZE, WallType, PropType, WeaponType, WeaponAction } from './types';
 
 // Import all sprite PNGs
 import enemySprite1 from '../components/LDZgviX.png';
 import enemySprite2 from '../components/ggp2.png';
 import enemySprite3 from '../components/gs.png';
 
-// Weapon sprites
+// Weapon sprites - base idle frames
 import knifeSprite from '../components/knife.png';
 import pistolSprite from '../components/revolver.png';
 import revolverSprite from '../components/revolver.png';
@@ -26,6 +28,29 @@ import ggp2BottomFrame0 from '../components/ggp2_bottom_frame_0.png';
 import ggp2BottomFrame1 from '../components/ggp2_bottom_frame_1.png';
 import ggp2BottomFrame2 from '../components/ggp2_bottom_frame_2.png';
 import ggp2BottomFrame3 from '../components/ggp2_bottom_frame_3.png';
+
+// Knife animation frames (melee)
+import knifeFrame0 from '../components/knife_frame_0.png';
+import knifeFrame1 from '../components/knife_frame_1.png';
+import knifeFrame2 from '../components/knife_frame_2.png';
+import knifeFrame3 from '../components/knife_frame_3.png';
+import knifeFrame4 from '../components/knife_frame_4.png';
+import knifeFrame5 from '../components/knife_frame_5.png';
+import knifeFrame6 from '../components/knife_frame_6.png';
+import knifeFrame7 from '../components/knife_frame_7.png';
+
+// Tommy gun flash frames
+import tommygunFlash1 from '../components/tommygunflash1.png';
+import tommygunFlash2 from '../components/tommygunflash2.png';
+import tommygunFlash3 from '../components/tommygunflash3.png';
+
+// Sniper frames (for future use)
+import ss2sniper1 from '../components/ss2sniper1.png';
+import ss2sniper2 from '../components/ss2sniper2.png';
+import ss2sniper3 from '../components/ss2sniper3.png';
+import ss2sniper4 from '../components/ss2sniper4.png';
+import ss2sniper5 from '../components/ss2sniper5.png';
+import ss2sniperFir1 from '../components/ss2sniperfir1.png';
 
 // Cache for generated textures (walls, floors, ceilings)
 const textureCache = new Map<number, Uint8Array>();
@@ -112,7 +137,7 @@ export async function initializeSprites(): Promise<void> {
   loadPromises.push(preloadSprite('enemy_alt1', enemySprite2));
   loadPromises.push(preloadSprite('enemy_alt2', enemySprite3));
   
-  // Preload weapon sprites from PNGs
+  // Preload weapon sprites from PNGs (base idle frames)
   loadPromises.push(preloadSprite('weapon_knife', knifeSprite));
   loadPromises.push(preloadSprite('weapon_pistol', pistolSprite));
   loadPromises.push(preloadSprite('weapon_revolver', revolverSprite));
@@ -128,6 +153,29 @@ export async function initializeSprites(): Promise<void> {
   loadPromises.push(preloadSprite('ggp2_bottom_1', ggp2BottomFrame1));
   loadPromises.push(preloadSprite('ggp2_bottom_2', ggp2BottomFrame2));
   loadPromises.push(preloadSprite('ggp2_bottom_3', ggp2BottomFrame3));
+  
+  // Preload knife melee animation frames (weapon_knife_melee_<frame>)
+  loadPromises.push(preloadSprite('weapon_knife_melee_00', knifeFrame0));
+  loadPromises.push(preloadSprite('weapon_knife_melee_01', knifeFrame1));
+  loadPromises.push(preloadSprite('weapon_knife_melee_02', knifeFrame2));
+  loadPromises.push(preloadSprite('weapon_knife_melee_03', knifeFrame3));
+  loadPromises.push(preloadSprite('weapon_knife_melee_04', knifeFrame4));
+  loadPromises.push(preloadSprite('weapon_knife_melee_05', knifeFrame5));
+  loadPromises.push(preloadSprite('weapon_knife_melee_06', knifeFrame6));
+  loadPromises.push(preloadSprite('weapon_knife_melee_07', knifeFrame7));
+  
+  // Preload tommy gun flash frames (weapon_tommygun_flash_<frame>)
+  loadPromises.push(preloadSprite('weapon_tommygun_flash_00', tommygunFlash1));
+  loadPromises.push(preloadSprite('weapon_tommygun_flash_01', tommygunFlash2));
+  loadPromises.push(preloadSprite('weapon_tommygun_flash_02', tommygunFlash3));
+  
+  // Preload sniper frames (weapon_sniper_<action>_<frame>)
+  loadPromises.push(preloadSprite('weapon_sniper_idle_00', ss2sniper1));
+  loadPromises.push(preloadSprite('weapon_sniper_idle_01', ss2sniper2));
+  loadPromises.push(preloadSprite('weapon_sniper_idle_02', ss2sniper3));
+  loadPromises.push(preloadSprite('weapon_sniper_fire_00', ss2sniperFir1));
+  loadPromises.push(preloadSprite('weapon_sniper_fire_01', ss2sniper4));
+  loadPromises.push(preloadSprite('weapon_sniper_fire_02', ss2sniper5));
   
   await Promise.all(loadPromises);
   console.log('[TextureLoader] All sprites preloaded');
@@ -1223,11 +1271,46 @@ export function getWeaponSprite(weaponId: string): Uint8Array {
   return spriteCache.get(key)!;
 }
 
-// Get animation frame by index
+// Get animation frame by index (legacy support)
 export function getAnimationFrame(baseName: string, frameIndex: number): Uint8Array | null {
   const key = `${baseName}_${frameIndex}`;
   if (spriteCache.has(key)) {
     return spriteCache.get(key)!;
   }
   return null;
+}
+
+/**
+ * Get weapon animation frame following the naming convention:
+ * weapon_<type>_<action>_<frame>.png
+ * 
+ * @param weaponType - The weapon type (pistol, revolver, shotgun, smg, tommygun, knife, sniper, gs)
+ * @param action - The animation action (idle, raise, lower, fire, reload, melee, inspect, flash, top, bottom)
+ * @param frameIndex - Zero-padded frame index (00, 01, 02, etc.)
+ * @returns The sprite texture or null if not found
+ */
+export function getWeaponAnimationFrame(weaponType: WeaponType, action: WeaponAction, frameIndex: number): Uint8Array | null {
+  const paddedIndex = frameIndex.toString().padStart(2, '0');
+  const key = `weapon_${weaponType}_${action}_${paddedIndex}`;
+  if (spriteCache.has(key)) {
+    return spriteCache.get(key)!;
+  }
+  return null;
+}
+
+/**
+ * Get the number of available frames for a weapon animation
+ * Falls back to default frame counts if no frames are preloaded
+ */
+export function getWeaponAnimFrameCount(weaponType: WeaponType, action: WeaponAction): number {
+  // Check how many frames are actually loaded
+  let count = 0;
+  for (let i = 0; i < 20; i++) {
+    if (getWeaponAnimationFrame(weaponType, action, i) !== null) {
+      count = i + 1;
+    } else {
+      break;
+    }
+  }
+  return count > 0 ? count : 1;
 }
