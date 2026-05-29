@@ -32,6 +32,7 @@ import {
   getItemSprite,
   getPropSprite,
   getWeaponSprite,
+  getWeaponAnimationFrame,
   initializeSprites,
 } from './textures';
 import { PlayerController } from './player';
@@ -777,7 +778,42 @@ export class GameEngine {
 
     const state = this.player.state;
     const weapon = this.player.getCurrentWeapon();
-    const source = this.getCanvasForTexture(`weapon:${weapon.id}`, getWeaponSprite(weapon.id));
+    
+    // Determine current animation action and frame
+    let action: 'idle' | 'fire' | 'reload' | 'melee' = 'idle';
+    let frameIndex = 0;
+    
+    if (weapon.isReloading) {
+      action = 'reload';
+      // Calculate reload frame based on timer
+      const totalReloadTime = weapon.reloadTime;
+      const elapsed = totalReloadTime - weapon.reloadTimer;
+      const maxFrames = weapon.animFrames.reload || 1;
+      frameIndex = Math.floor((elapsed / totalReloadTime) * maxFrames);
+    } else if (weapon.recoilOffset > 0.5) {
+      action = 'fire';
+      // Calculate fire animation frame based on recoil
+      const maxFrames = weapon.animFrames.fire || 4;
+      const fireProgress = 1 - weapon.recoilOffset;
+      frameIndex = Math.floor(fireProgress * maxFrames);
+    } else if (weapon.id === 'knife' && state.bobPhase > 0.1) {
+      action = 'melee';
+      frameIndex = Math.floor(state.bobPhase * 2) % (weapon.animFrames.melee || 8);
+    } else {
+      action = 'idle';
+      // Idle animation cycles through frames
+      frameIndex = Math.floor(state.bobPhase * 0.5) % (weapon.animFrames.idle || 2);
+    }
+    
+    // Try to get animated frame, fallback to base sprite
+    let source: Uint8Array;
+    const animFrame = getWeaponAnimationFrame(weapon.weaponType, action, frameIndex);
+    if (animFrame) {
+      source = this.getCanvasForTexture(`weapon:${weapon.id}:${action}:${frameIndex}`, animFrame);
+    } else {
+      source = this.getCanvasForTexture(`weapon:${weapon.id}`, getWeaponSprite(weapon.id));
+    }
+    
     const bobX = Math.cos(state.bobPhase) * 6;
     const bobY = Math.abs(Math.sin(state.bobPhase)) * 4;
     const recoil = weapon.recoilOffset * 12;

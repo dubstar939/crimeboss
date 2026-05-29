@@ -88,7 +88,7 @@ function createTexture(draw: (ctx: CanvasRenderingContext2D) => void): Uint8Arra
   const canvas = document.createElement('canvas');
   canvas.width = TEX_SIZE;
   canvas.height = TEX_SIZE;
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
   draw(ctx);
   return new Uint8Array(ctx.getImageData(0, 0, TEX_SIZE, TEX_SIZE).data);
 }
@@ -102,7 +102,7 @@ async function loadPngToTexture(src: string): Promise<Uint8Array> {
       const canvas = document.createElement('canvas');
       canvas.width = TEX_SIZE;
       canvas.height = TEX_SIZE;
-      const ctx = canvas.getContext('2d')!;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
       ctx.drawImage(img, 0, 0, TEX_SIZE, TEX_SIZE);
       const data = new Uint8Array(ctx.getImageData(0, 0, TEX_SIZE, TEX_SIZE).data);
       resolve(data);
