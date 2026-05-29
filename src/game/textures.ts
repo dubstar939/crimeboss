@@ -14,7 +14,7 @@ import enemySprite3 from '../components/gs.png';
 
 // Weapon sprites - base idle frames
 import knifeSprite from '../components/knife.png';
-import pistolSprite from '../components/revolver.png';
+import pistolSprite from '../components/pistol.png';
 import revolverSprite from '../components/revolver.png';
 import tommygunSprite from '../components/tommygun.png';
 import shotgunSprite from '../components/shotgun.png';
