@@ -1,53 +1,7 @@
-```typescript
-// Compiled JavaScript/TypeScript output
-*.js
-*.js.map
-*.d.ts
-
-// Dependencies
-node_modules/
-
-// Build outputs
-dist/
-build/
-target/
-
-// IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-// Environment
-.env
-.env.local
-*.env.*
-
-// Logs
-*.log
-
-// Coverage
-coverage/
-htmlcov/
-*.coverage
-
-// Python artifacts (if any Python files exist)
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-// Temporary files
-*.tmp
-*.temp
-
-// OS files
-.DS_Store
-Thumbs.db
-
-// Cache directories
-.cache/
-.mypy_cache/
-.pytest_cache/
-.nyc_output/
-```
+# Image files (from deleted files)
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.gif
+*.webm
