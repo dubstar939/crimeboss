@@ -38,6 +38,7 @@ import { PlayerController } from './player';
 import { EnemyAI } from './enemy';
 import { AudioManager } from './audio';
 import { buildCameraBasis, castRay } from './raycast';
+import { EventEmitter, GameEvent } from './events';
 
 interface RenderSprite {
   x: number;
@@ -70,7 +71,6 @@ export class GameEngine {
 
   currentLevelIdx = 0;
   map: number[][] = [];
-  screen: GameScreen = GameScreen.MAIN_MENU;
   settings: GameSettings = {
     mouseSensitivity: 1,
     masterVolume: 0.7,
@@ -96,6 +96,20 @@ export class GameEngine {
   raySamples: number[] = [0, 0, 0];
 
   private textureCanvasCache = new Map<string, HTMLCanvasElement>();
+  private events = new EventEmitter();
+  private _screen: GameScreen = GameScreen.MAIN_MENU;
+
+  get screen(): GameScreen {
+    return this._screen;
+  }
+
+  set screen(value: GameScreen) {
+    const oldScreen = this._screen;
+    this._screen = value;
+    if (oldScreen !== value) {
+      this.events.emit({ type: 'screen_change', payload: { from: oldScreen, to: value } });
+    }
+  }
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -1001,5 +1015,20 @@ export class GameEngine {
     ctx.putImageData(image, 0, 0);
     this.textureCanvasCache.set(key, canvas);
     return canvas;
+  }
+
+  // ---- Event System ----
+  onScreenChange(callback: (screen: GameScreen) => void): () => void {
+    return this.events.on('screen_change', (event) => {
+      callback(event.payload as { from: GameScreen; to: GameScreen } as any);
+    });
+  }
+
+  on(event: string, callback: (...args: unknown[]) => void): () => void {
+    return this.events.on(event as any, (e) => callback(e.payload));
+  }
+
+  off(event: string, callback: (...args: unknown[]) => void): void {
+    this.events.off(event as any, callback as any);
   }
 }
