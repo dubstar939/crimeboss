@@ -16,32 +16,51 @@ export default function Game() {
   const [completedLevels, setCompletedLevels] = useState<number[]>([]);
   const [highScore, setHighScore] = useState(0);
 
-  // Sync engine screen state with React
-  const syncScreen = useCallback(() => {
-    if (engineRef.current) {
-      setScreen(engineRef.current.screen);
-      setLevelIdx(engineRef.current.currentLevelIdx);
-      setCompletedLevels([...engineRef.current.completedLevels]);
-      setHighScore(engineRef.current.highScore);
-    }
+  // Sync engine screen state with React via events instead of polling
+  useEffect(() => {
+    const engine = engineRef.current;
+    if (!engine) return;
+
+    // Initial sync
+    setScreen(engine.screen);
+    setLevelIdx(engine.currentLevelIdx);
+    setCompletedLevels([...engine.completedLevels]);
+    setHighScore(engine.highScore);
+
+    // Subscribe to screen changes
+    const unsubscribe = engine.onScreenChange(() => {
+      setScreen(engine.screen);
+      setLevelIdx(engine.currentLevelIdx);
+      setCompletedLevels([...engine.completedLevels]);
+      setHighScore(engine.highScore);
+    });
+
+    return unsubscribe;
   }, []);
 
+  // Initialize engine on mount
   useEffect(() => {
     if (!canvasRef.current) return;
     const engine = new GameEngine(canvasRef.current);
     engineRef.current = engine;
 
-    // Poll for screen changes
-    const interval = setInterval(syncScreen, 200);
-
     // Start the engine loop
     engine.start();
 
     return () => {
-      clearInterval(interval);
       engine.stop();
     };
-  }, [syncScreen]);
+  }, []);
+
+  // Helper to sync state after actions
+  const syncScreen = useCallback(() => {
+    const engine = engineRef.current;
+    if (!engine) return;
+    setScreen(engine.screen);
+    setLevelIdx(engine.currentLevelIdx);
+    setCompletedLevels([...engine.completedLevels]);
+    setHighScore(engine.highScore);
+  }, []);
 
   const handleNewGame = async () => {
     const engine = engineRef.current;
