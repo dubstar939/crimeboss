@@ -103,11 +103,12 @@ async function loadPngToTexture(src: string): Promise<Uint8Array> {
       canvas.width = TEX_SIZE;
       canvas.height = TEX_SIZE;
       const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+      ctx.imageSmoothingEnabled = false;
       ctx.drawImage(img, 0, 0, TEX_SIZE, TEX_SIZE);
       const data = new Uint8Array(ctx.getImageData(0, 0, TEX_SIZE, TEX_SIZE).data);
       resolve(data);
     };
-    img.onerror = reject;
+    img.onerror = () => reject(new Error(`Failed to load image from ${src}`));
     img.src = src;
   });
 }
@@ -120,8 +121,9 @@ async function preloadSprite(key: string, src: string): Promise<void> {
   try {
     const data = await loadPngToTexture(src);
     spriteCache.set(key, data);
+    console.log(`[TextureLoader] ✓ Loaded sprite: ${key}`);
   } catch (e) {
-    console.warn(`Failed to load sprite ${key}:`, e);
+    console.error(`[TextureLoader] ✗ Failed to load sprite ${key}:`, e);
   }
 }
 
@@ -131,6 +133,8 @@ export async function initializeSprites(): Promise<void> {
   
   // Clear any existing cached sprites
   spriteCache.clear();
+  
+  console.log('[TextureLoader] Starting sprite preload...');
   
   // Preload all enemy sprites
   loadPromises.push(preloadSprite('enemy_main', enemySprite1));
@@ -178,7 +182,7 @@ export async function initializeSprites(): Promise<void> {
   loadPromises.push(preloadSprite('weapon_sniper_fire_02', ss2sniper5));
   
   await Promise.all(loadPromises);
-  console.log('[TextureLoader] All sprites preloaded');
+  console.log(`[TextureLoader] All sprites preloaded. Cache size: ${spriteCache.size}`);
 }
 
 // ---- Wall Textures ----
@@ -1263,10 +1267,12 @@ export function getWeaponSprite(weaponId: string): Uint8Array {
   
   // Try to use preloaded PNG sprite first
   if (spriteCache.has(key)) {
+    console.log(`[TextureLoader] Using cached weapon sprite: ${key}`);
     return spriteCache.get(key)!;
   }
   
   // Fallback to procedural generation if no PNG loaded
+  console.log(`[TextureLoader] No cached sprite for ${key}, generating procedurally`);
   spriteCache.set(key, genWeaponSprite(weaponId));
   return spriteCache.get(key)!;
 }
