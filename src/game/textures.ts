@@ -52,6 +52,29 @@ import ss2sniper4 from '../components/ss2sniper4.png';
 import ss2sniper5 from '../components/ss2sniper5.png';
 import ss2sniperFir1 from '../components/ss2sniperfir1.png';
 
+// FPS Generic weapon animation frames
+import fpsWeaponFrame0 from '../components/fps_weapon_frame_0.png';
+import fpsWeaponFrame1 from '../components/fps_weapon_frame_1.png';
+import fpsWeaponFrame2 from '../components/fps_weapon_frame_2.png';
+import fpsWeaponFrame3 from '../components/fps_weapon_frame_3.png';
+import fpsWeaponFrame4 from '../components/fps_weapon_frame_4.png';
+import fpsWeaponFrame5 from '../components/fps_weapon_frame_5.png';
+import fpsWeaponFrame6 from '../components/fps_weapon_frame_6.png';
+import fpsWeaponFrame7 from '../components/fps_weapon_frame_7.png';
+import fpsWeaponFrame8 from '../components/fps_weapon_frame_8.png';
+import fpsWeaponFrame9 from '../components/fps_weapon_frame_9.png';
+import fpsWeaponFrame10 from '../components/fps_weapon_frame_10.png';
+import fpsWeaponFrame11 from '../components/fps_weapon_frame_11.png';
+import fpsWeaponFrame12 from '../components/fps_weapon_frame_12.png';
+import fpsWeaponFrame13 from '../components/fps_weapon_frame_13.png';
+import fpsWeaponFrame14 from '../components/fps_weapon_frame_14.png';
+import fpsWeaponFrame15 from '../components/fps_weapon_frame_15.png';
+
+// Additional tommygun assets
+import tommygun1 from '../components/tommygun1.png';
+import tommygunProp from '../components/tommygunprop.png';
+import tommygunSprite from '../components/tommygunsprite.png';
+
 // Cache for generated textures (walls, floors, ceilings)
 const textureCache = new Map<number, Uint8Array>();
 
@@ -180,6 +203,29 @@ export async function initializeSprites(): Promise<void> {
   loadPromises.push(preloadSprite('weapon_sniper_fire_00', ss2sniperFir1));
   loadPromises.push(preloadSprite('weapon_sniper_fire_01', ss2sniper4));
   loadPromises.push(preloadSprite('weapon_sniper_fire_02', ss2sniper5));
+  
+  // Preload FPS generic weapon animation frames
+  loadPromises.push(preloadSprite('fps_weapon_frame_00', fpsWeaponFrame0));
+  loadPromises.push(preloadSprite('fps_weapon_frame_01', fpsWeaponFrame1));
+  loadPromises.push(preloadSprite('fps_weapon_frame_02', fpsWeaponFrame2));
+  loadPromises.push(preloadSprite('fps_weapon_frame_03', fpsWeaponFrame3));
+  loadPromises.push(preloadSprite('fps_weapon_frame_04', fpsWeaponFrame4));
+  loadPromises.push(preloadSprite('fps_weapon_frame_05', fpsWeaponFrame5));
+  loadPromises.push(preloadSprite('fps_weapon_frame_06', fpsWeaponFrame6));
+  loadPromises.push(preloadSprite('fps_weapon_frame_07', fpsWeaponFrame7));
+  loadPromises.push(preloadSprite('fps_weapon_frame_08', fpsWeaponFrame8));
+  loadPromises.push(preloadSprite('fps_weapon_frame_09', fpsWeaponFrame9));
+  loadPromises.push(preloadSprite('fps_weapon_frame_10', fpsWeaponFrame10));
+  loadPromises.push(preloadSprite('fps_weapon_frame_11', fpsWeaponFrame11));
+  loadPromises.push(preloadSprite('fps_weapon_frame_12', fpsWeaponFrame12));
+  loadPromises.push(preloadSprite('fps_weapon_frame_13', fpsWeaponFrame13));
+  loadPromises.push(preloadSprite('fps_weapon_frame_14', fpsWeaponFrame14));
+  loadPromises.push(preloadSprite('fps_weapon_frame_15', fpsWeaponFrame15));
+  
+  // Preload additional tommygun assets
+  loadPromises.push(preloadSprite('tommygun_alt', tommygun1));
+  loadPromises.push(preloadSprite('tommygun_prop', tommygunProp));
+  loadPromises.push(preloadSprite('tommygun_sprite', tommygunSprite));
   
   await Promise.all(loadPromises);
   console.log(`[TextureLoader] All sprites preloaded. Cache size: ${spriteCache.size}`);
