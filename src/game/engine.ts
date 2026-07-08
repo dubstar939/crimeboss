@@ -806,12 +806,12 @@ export class GameEngine {
     }
     
     // Try to get animated frame, fallback to base sprite
-    let source: Uint8Array;
+    let sourceCanvas: HTMLCanvasElement;
     const animFrame = getWeaponAnimationFrame(weapon.weaponType, action, frameIndex);
     if (animFrame) {
-      source = this.getCanvasForTexture(`weapon:${weapon.id}:${action}:${frameIndex}`, animFrame);
+      sourceCanvas = this.getCanvasForTexture(`weapon:${weapon.id}:${action}:${frameIndex}`, animFrame);
     } else {
-      source = this.getCanvasForTexture(`weapon:${weapon.id}`, getWeaponSprite(weapon.id));
+      sourceCanvas = this.getCanvasForTexture(`weapon:${weapon.id}`, getWeaponSprite(weapon.id));
     }
     
     const bobX = Math.cos(state.bobPhase) * 6;
@@ -824,7 +824,7 @@ export class GameEngine {
 
     this.ctx.save();
     this.ctx.imageSmoothingEnabled = false;
-    this.ctx.drawImage(source, Math.floor(x), Math.floor(y), Math.floor(width), Math.floor(height));
+    this.ctx.drawImage(sourceCanvas, Math.floor(x), Math.floor(y), Math.floor(width), Math.floor(height));
 
     if (weapon.recoilOffset > 0.45 && weapon.id !== 'knife') {
       this.ctx.fillStyle = `rgba(255, 214, 92, ${weapon.recoilOffset})`;
@@ -1038,6 +1038,17 @@ export class GameEngine {
     image.data.set(texture);
     ctx.putImageData(image, 0, 0);
     this.textureCanvasCache.set(key, canvas);
+    return canvas;
+  }
+
+  private getCanvasFromTexture(texture: Uint8Array): HTMLCanvasElement {
+    const canvas = document.createElement('canvas');
+    canvas.width = TEX_SIZE;
+    canvas.height = TEX_SIZE;
+    const ctx = canvas.getContext('2d')!;
+    const image = ctx.createImageData(TEX_SIZE, TEX_SIZE);
+    image.data.set(texture);
+    ctx.putImageData(image, 0, 0);
     return canvas;
   }
 }
