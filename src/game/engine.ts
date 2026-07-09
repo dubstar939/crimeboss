@@ -185,6 +185,13 @@ export class GameEngine {
     this.audio.resume();
     this.currentLevelIdx = 0;
     this.screen = GameScreen.BRIEFING;
+    this.loadLevel(0);
+    // Auto-start game after briefing delay
+    setTimeout(() => {
+      if (this.screen === GameScreen.BRIEFING) {
+        this.screen = GameScreen.PLAYING;
+      }
+    }, 2000);
   }
 
   async continueGame() {
@@ -521,7 +528,7 @@ export class GameEngine {
   private render() {
     this.ctx.clearRect(0, 0, RENDER_WIDTH, RENDER_HEIGHT);
 
-    const shouldRenderWorld = this.player && this.map.length > 0 && this.screen !== GameScreen.MAIN_MENU && this.screen !== GameScreen.OPTIONS && this.screen !== GameScreen.BRIEFING;
+    const shouldRenderWorld = this.player && this.map.length > 0;
     if (!shouldRenderWorld || !this.player) {
       this.ctx.fillStyle = '#000';
       this.ctx.fillRect(0, 0, RENDER_WIDTH, RENDER_HEIGHT);
