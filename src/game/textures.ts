@@ -7,74 +7,6 @@
 
 import { TEX_SIZE, WallType, PropType, WeaponType, WeaponAction } from './types';
 
-// Import all sprite PNGs
-import enemySprite1 from '../components/LDZgviX.png';
-import enemySprite2 from '../components/ggp2.png';
-import enemySprite3 from '../components/gs.png';
-
-// Weapon sprites - base idle frames
-import knifeSprite from '../components/knife.png';
-import pistolSprite from '../components/pistol.png';
-import revolverSprite from '../components/revolver.png';
-import tommygunSprite from '../components/tommygun.png';
-import shotgunSprite from '../components/shotgun.png';
-
-// Animation frames
-import ggp2TopFrame0 from '../components/ggp2_top_frame_0.png';
-import ggp2TopFrame1 from '../components/ggp2_top_frame_1.png';
-import ggp2TopFrame2 from '../components/ggp2_top_frame_2.png';
-import ggp2TopFrame3 from '../components/ggp2_top_frame_3.png';
-import ggp2BottomFrame0 from '../components/ggp2_bottom_frame_0.png';
-import ggp2BottomFrame1 from '../components/ggp2_bottom_frame_1.png';
-import ggp2BottomFrame2 from '../components/ggp2_bottom_frame_2.png';
-import ggp2BottomFrame3 from '../components/ggp2_bottom_frame_3.png';
-
-// Knife animation frames (melee)
-import knifeFrame0 from '../components/knife_frame_0.png';
-import knifeFrame1 from '../components/knife_frame_1.png';
-import knifeFrame2 from '../components/knife_frame_2.png';
-import knifeFrame3 from '../components/knife_frame_3.png';
-import knifeFrame4 from '../components/knife_frame_4.png';
-import knifeFrame5 from '../components/knife_frame_5.png';
-import knifeFrame6 from '../components/knife_frame_6.png';
-import knifeFrame7 from '../components/knife_frame_7.png';
-
-// Tommy gun flash frames
-import tommygunFlash1 from '../components/tommygunflash1.png';
-import tommygunFlash2 from '../components/tommygunflash2.png';
-import tommygunFlash3 from '../components/tommygunflash3.png';
-
-// Sniper frames (for future use)
-import ss2sniper1 from '../components/ss2sniper1.png';
-import ss2sniper2 from '../components/ss2sniper2.png';
-import ss2sniper3 from '../components/ss2sniper3.png';
-import ss2sniper4 from '../components/ss2sniper4.png';
-import ss2sniper5 from '../components/ss2sniper5.png';
-import ss2sniperFir1 from '../components/ss2sniperfir1.png';
-
-// FPS Generic weapon animation frames
-import fpsWeaponFrame0 from '../components/fps_weapon_frame_0.png';
-import fpsWeaponFrame1 from '../components/fps_weapon_frame_1.png';
-import fpsWeaponFrame2 from '../components/fps_weapon_frame_2.png';
-import fpsWeaponFrame3 from '../components/fps_weapon_frame_3.png';
-import fpsWeaponFrame4 from '../components/fps_weapon_frame_4.png';
-import fpsWeaponFrame5 from '../components/fps_weapon_frame_5.png';
-import fpsWeaponFrame6 from '../components/fps_weapon_frame_6.png';
-import fpsWeaponFrame7 from '../components/fps_weapon_frame_7.png';
-import fpsWeaponFrame8 from '../components/fps_weapon_frame_8.png';
-import fpsWeaponFrame9 from '../components/fps_weapon_frame_9.png';
-import fpsWeaponFrame10 from '../components/fps_weapon_frame_10.png';
-import fpsWeaponFrame11 from '../components/fps_weapon_frame_11.png';
-import fpsWeaponFrame12 from '../components/fps_weapon_frame_12.png';
-import fpsWeaponFrame13 from '../components/fps_weapon_frame_13.png';
-import fpsWeaponFrame14 from '../components/fps_weapon_frame_14.png';
-import fpsWeaponFrame15 from '../components/fps_weapon_frame_15.png';
-
-// Additional tommygun assets
-import tommygun1 from '../components/tommygun1.png';
-import tommygunProp from '../components/tommygunprop.png';
-import tommygunSprite from '../components/tommygunsprite.png';
-
 // Cache for generated textures (walls, floors, ceilings)
 const textureCache = new Map<number, Uint8Array>();
 
@@ -116,39 +48,9 @@ function createTexture(draw: (ctx: CanvasRenderingContext2D) => void): Uint8Arra
   return new Uint8Array(ctx.getImageData(0, 0, TEX_SIZE, TEX_SIZE).data);
 }
 
-// Load PNG and convert to Uint8Array at TEX_SIZE
-async function loadPngToTexture(src: string): Promise<Uint8Array> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = TEX_SIZE;
-      canvas.height = TEX_SIZE;
-      const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(img, 0, 0, TEX_SIZE, TEX_SIZE);
-      const data = new Uint8Array(ctx.getImageData(0, 0, TEX_SIZE, TEX_SIZE).data);
-      resolve(data);
-    };
-    img.onerror = () => reject(new Error(`Failed to load image from ${src}`));
-    img.src = src;
-  });
-}
-
 // Preload all sprite images on module init
 let spritesLoaded = false;
 const loadPromises: Promise<void>[] = [];
-
-async function preloadSprite(key: string, src: string): Promise<void> {
-  try {
-    const data = await loadPngToTexture(src);
-    spriteCache.set(key, data);
-    console.log(`[TextureLoader] ✓ Loaded sprite: ${key}`);
-  } catch (e) {
-    console.error(`[TextureLoader] ✗ Failed to load sprite ${key}:`, e);
-  }
-}
 
 export async function initializeSprites(): Promise<void> {
   if (spritesLoaded) return;
@@ -159,76 +61,125 @@ export async function initializeSprites(): Promise<void> {
   
   console.log('[TextureLoader] Starting sprite preload...');
   
-  // Preload all enemy sprites
-  loadPromises.push(preloadSprite('enemy_main', enemySprite1));
-  loadPromises.push(preloadSprite('enemy_alt1', enemySprite2));
-  loadPromises.push(preloadSprite('enemy_alt2', enemySprite3));
+  // Generate procedural sprites instead of loading PNG files
+  // Enemy sprites - generated procedurally
+  loadPromises.push(Promise.resolve(generateEnemySprite('enemy_main')));
+  loadPromises.push(Promise.resolve(generateEnemySprite('enemy_alt1')));
+  loadPromises.push(Promise.resolve(generateEnemySprite('enemy_alt2')));
   
-  // Preload weapon sprites from PNGs (base idle frames)
-  loadPromises.push(preloadSprite('weapon_knife', knifeSprite));
-  loadPromises.push(preloadSprite('weapon_pistol', pistolSprite));
-  loadPromises.push(preloadSprite('weapon_revolver', revolverSprite));
-  loadPromises.push(preloadSprite('weapon_tommygun', tommygunSprite));
-  loadPromises.push(preloadSprite('weapon_shotgun', shotgunSprite));
+  // Weapon sprites - generated procedurally
+  loadPromises.push(Promise.resolve(generateWeaponSprite('weapon_knife')));
+  loadPromises.push(Promise.resolve(generateWeaponSprite('weapon_pistol')));
+  loadPromises.push(Promise.resolve(generateWeaponSprite('weapon_revolver')));
+  loadPromises.push(Promise.resolve(generateWeaponSprite('weapon_tommygun')));
+  loadPromises.push(Promise.resolve(generateWeaponSprite('weapon_shotgun')));
   
-  // Preload animation frames
-  loadPromises.push(preloadSprite('ggp2_top_0', ggp2TopFrame0));
-  loadPromises.push(preloadSprite('ggp2_top_1', ggp2TopFrame1));
-  loadPromises.push(preloadSprite('ggp2_top_2', ggp2TopFrame2));
-  loadPromises.push(preloadSprite('ggp2_top_3', ggp2TopFrame3));
-  loadPromises.push(preloadSprite('ggp2_bottom_0', ggp2BottomFrame0));
-  loadPromises.push(preloadSprite('ggp2_bottom_1', ggp2BottomFrame1));
-  loadPromises.push(preloadSprite('ggp2_bottom_2', ggp2BottomFrame2));
-  loadPromises.push(preloadSprite('ggp2_bottom_3', ggp2BottomFrame3));
+  // Animation frames - generated procedurally
+  for (let i = 0; i < 4; i++) {
+    loadPromises.push(Promise.resolve(generateAnimationFrame('ggp2_top_' + i)));
+    loadPromises.push(Promise.resolve(generateAnimationFrame('ggp2_bottom_' + i)));
+  }
   
-  // Preload knife melee animation frames (weapon_knife_melee_<frame>)
-  loadPromises.push(preloadSprite('weapon_knife_melee_00', knifeFrame0));
-  loadPromises.push(preloadSprite('weapon_knife_melee_01', knifeFrame1));
-  loadPromises.push(preloadSprite('weapon_knife_melee_02', knifeFrame2));
-  loadPromises.push(preloadSprite('weapon_knife_melee_03', knifeFrame3));
-  loadPromises.push(preloadSprite('weapon_knife_melee_04', knifeFrame4));
-  loadPromises.push(preloadSprite('weapon_knife_melee_05', knifeFrame5));
-  loadPromises.push(preloadSprite('weapon_knife_melee_06', knifeFrame6));
-  loadPromises.push(preloadSprite('weapon_knife_melee_07', knifeFrame7));
+  // Knife melee animation frames
+  for (let i = 0; i < 8; i++) {
+    loadPromises.push(Promise.resolve(generateAnimationFrame('weapon_knife_melee_' + String(i).padStart(2, '0'))));
+  }
   
-  // Preload tommy gun flash frames (weapon_tommygun_flash_<frame>)
-  loadPromises.push(preloadSprite('weapon_tommygun_flash_00', tommygunFlash1));
-  loadPromises.push(preloadSprite('weapon_tommygun_flash_01', tommygunFlash2));
-  loadPromises.push(preloadSprite('weapon_tommygun_flash_02', tommygunFlash3));
+  // Tommy gun flash frames
+  for (let i = 0; i < 3; i++) {
+    loadPromises.push(Promise.resolve(generateAnimationFrame('weapon_tommygun_flash_' + String(i).padStart(2, '0'))));
+  }
   
-  // Preload sniper frames (weapon_sniper_<action>_<frame>)
-  loadPromises.push(preloadSprite('weapon_sniper_idle_00', ss2sniper1));
-  loadPromises.push(preloadSprite('weapon_sniper_idle_01', ss2sniper2));
-  loadPromises.push(preloadSprite('weapon_sniper_idle_02', ss2sniper3));
-  loadPromises.push(preloadSprite('weapon_sniper_fire_00', ss2sniperFir1));
-  loadPromises.push(preloadSprite('weapon_sniper_fire_01', ss2sniper4));
-  loadPromises.push(preloadSprite('weapon_sniper_fire_02', ss2sniper5));
+  // Sniper frames
+  loadPromises.push(Promise.resolve(generateWeaponSprite('weapon_sniper_idle_00')));
+  loadPromises.push(Promise.resolve(generateWeaponSprite('weapon_sniper_idle_01')));
+  loadPromises.push(Promise.resolve(generateWeaponSprite('weapon_sniper_idle_02')));
+  loadPromises.push(Promise.resolve(generateWeaponSprite('weapon_sniper_fire_00')));
+  loadPromises.push(Promise.resolve(generateWeaponSprite('weapon_sniper_fire_01')));
+  loadPromises.push(Promise.resolve(generateWeaponSprite('weapon_sniper_fire_02')));
   
-  // Preload FPS generic weapon animation frames
-  loadPromises.push(preloadSprite('fps_weapon_frame_00', fpsWeaponFrame0));
-  loadPromises.push(preloadSprite('fps_weapon_frame_01', fpsWeaponFrame1));
-  loadPromises.push(preloadSprite('fps_weapon_frame_02', fpsWeaponFrame2));
-  loadPromises.push(preloadSprite('fps_weapon_frame_03', fpsWeaponFrame3));
-  loadPromises.push(preloadSprite('fps_weapon_frame_04', fpsWeaponFrame4));
-  loadPromises.push(preloadSprite('fps_weapon_frame_05', fpsWeaponFrame5));
-  loadPromises.push(preloadSprite('fps_weapon_frame_06', fpsWeaponFrame6));
-  loadPromises.push(preloadSprite('fps_weapon_frame_07', fpsWeaponFrame7));
-  loadPromises.push(preloadSprite('fps_weapon_frame_08', fpsWeaponFrame8));
-  loadPromises.push(preloadSprite('fps_weapon_frame_09', fpsWeaponFrame9));
-  loadPromises.push(preloadSprite('fps_weapon_frame_10', fpsWeaponFrame10));
-  loadPromises.push(preloadSprite('fps_weapon_frame_11', fpsWeaponFrame11));
-  loadPromises.push(preloadSprite('fps_weapon_frame_12', fpsWeaponFrame12));
-  loadPromises.push(preloadSprite('fps_weapon_frame_13', fpsWeaponFrame13));
-  loadPromises.push(preloadSprite('fps_weapon_frame_14', fpsWeaponFrame14));
-  loadPromises.push(preloadSprite('fps_weapon_frame_15', fpsWeaponFrame15));
+  // FPS generic weapon animation frames
+  for (let i = 0; i < 16; i++) {
+    loadPromises.push(Promise.resolve(generateAnimationFrame('fps_weapon_frame_' + String(i).padStart(2, '0'))));
+  }
   
-  // Preload additional tommygun assets
-  loadPromises.push(preloadSprite('tommygun_alt', tommygun1));
-  loadPromises.push(preloadSprite('tommygun_prop', tommygunProp));
-  loadPromises.push(preloadSprite('tommygun_sprite', tommygunSprite));
+  // Additional tommygun assets
+  loadPromises.push(Promise.resolve(generateWeaponSprite('tommygun_alt')));
+  loadPromises.push(Promise.resolve(generateWeaponSprite('tommygun_prop')));
+  loadPromises.push(Promise.resolve(generateWeaponSprite('tommygun_sprite')));
   
   await Promise.all(loadPromises);
   console.log(`[TextureLoader] All sprites preloaded. Cache size: ${spriteCache.size}`);
+}
+
+// Helper functions to generate procedural sprites
+function generateEnemySprite(key: string): void {
+  const data = new Uint8Array(TEX_SIZE * TEX_SIZE * 4);
+  // Generate a simple enemy silhouette
+  for (let y = 0; y < TEX_SIZE; y++) {
+    for (let x = 0; x < TEX_SIZE; x++) {
+      const idx = (y * TEX_SIZE + x) * 4;
+      // Create a brown/tan enemy shape
+      const centerX = TEX_SIZE / 2;
+      const centerY = TEX_SIZE / 2;
+      const dist = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+      if (dist < TEX_SIZE / 3) {
+        data[idx] = 139;     // R
+        data[idx + 1] = 90;  // G
+        data[idx + 2] = 43;  // B
+        data[idx + 3] = 255; // A
+      } else {
+        data[idx + 3] = 0;   // Transparent
+      }
+    }
+  }
+  spriteCache.set(key, data);
+}
+
+function generateWeaponSprite(key: string): void {
+  const data = new Uint8Array(TEX_SIZE * TEX_SIZE * 4);
+  // Generate a simple weapon shape
+  for (let y = 0; y < TEX_SIZE; y++) {
+    for (let x = 0; x < TEX_SIZE; x++) {
+      const idx = (y * TEX_SIZE + x) * 4;
+      // Create a dark metal weapon shape
+      const centerX = TEX_SIZE / 2;
+      if (Math.abs(x - centerX) < TEX_SIZE / 6 && y > TEX_SIZE / 4) {
+        data[idx] = 64;      // R
+        data[idx + 1] = 64;  // G
+        data[idx + 2] = 72;  // B
+        data[idx + 3] = 255; // A
+      } else {
+        data[idx + 3] = 0;   // Transparent
+      }
+    }
+  }
+  spriteCache.set(key, data);
+}
+
+function generateAnimationFrame(key: string): void {
+  const data = new Uint8Array(TEX_SIZE * TEX_SIZE * 4);
+  // Generate a simple animation frame with some variation
+  for (let y = 0; y < TEX_SIZE; y++) {
+    for (let x = 0; x < TEX_SIZE; x++) {
+      const idx = (y * TEX_SIZE + x) * 4;
+      // Create a muzzle flash or effect
+      const centerX = TEX_SIZE / 2;
+      const centerY = TEX_SIZE / 2;
+      const dist = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+      const frameNum = parseInt(key.split('_').pop() || '0');
+      const variation = (frameNum % 4) * 20;
+      if (dist < TEX_SIZE / 4 + variation) {
+        data[idx] = 255;         // R
+        data[idx + 1] = 200;     // G
+        data[idx + 2] = 50;      // B
+        data[idx + 3] = 255 - dist * 4; // A (fade at edges)
+      } else {
+        data[idx + 3] = 0;       // Transparent
+      }
+    }
+  }
+  spriteCache.set(key, data);
 }
 
 // ---- Wall Textures ----
