@@ -91,7 +91,7 @@ export class GameEngine {
   highScore = 0;
 
   showMinimap = true;
-  showDebug = true;
+  showDebug = false;
   messageText = '';
   messageTimer = 0;
   raySamples: number[] = [0, 0, 0];
@@ -102,8 +102,15 @@ export class GameEngine {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d', { willReadFrequently: true })!;
     this.ctx.imageSmoothingEnabled = false;
+    
+    // Set internal resolution
     canvas.width = RENDER_WIDTH;
     canvas.height = RENDER_HEIGHT;
+    
+    // Force canvas to fill viewport via CSS
+    this.resizeCanvas();
+    window.addEventListener('resize', () => this.resizeCanvas());
+    
     this.imageData = this.ctx.createImageData(RENDER_WIDTH, RENDER_HEIGHT);
     this.pixels = this.imageData.data;
     this.depthBuffer = new Float32Array(RENDER_WIDTH);
@@ -114,6 +121,15 @@ export class GameEngine {
     this.audio.setMasterVolume(this.settings.masterVolume);
     this.audio.setSfxVolume(this.settings.sfxVolume);
     this.audio.setMusicVolume(this.settings.musicVolume);
+  }
+  
+  private resizeCanvas() {
+    // Keep internal resolution but scale display via CSS
+    const container = this.canvas.parentElement;
+    if (container) {
+      this.canvas.style.width = '100%';
+      this.canvas.style.height = '100%';
+    }
   }
 
   // ---- Input ----

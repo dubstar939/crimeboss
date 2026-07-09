@@ -138,22 +138,302 @@ function generateEnemySprite(key: string): void {
 
 function generateWeaponSprite(key: string): void {
   const data = new Uint8Array(TEX_SIZE * TEX_SIZE * 4);
-  // Generate a simple weapon shape
-  for (let y = 0; y < TEX_SIZE; y++) {
-    for (let x = 0; x < TEX_SIZE; x++) {
-      const idx = (y * TEX_SIZE + x) * 4;
-      // Create a dark metal weapon shape
-      const centerX = TEX_SIZE / 2;
-      if (Math.abs(x - centerX) < TEX_SIZE / 6 && y > TEX_SIZE / 4) {
-        data[idx] = 64;      // R
-        data[idx + 1] = 64;  // G
-        data[idx + 2] = 72;  // B
-        data[idx + 3] = 255; // A
-      } else {
-        data[idx + 3] = 0;   // Transparent
+  
+  // Clear to transparent
+  for (let i = 0; i < data.length; i++) {
+    data[i] = 0;
+  }
+  
+  // Generate weapon-specific sprite
+  if (key.includes('knife')) {
+    // Combat knife - vertical orientation with blade pointing up
+    const centerX = Math.floor(TEX_SIZE / 2);
+    const bladeTop = Math.floor(TEX_SIZE * 0.15);
+    const bladeBottom = Math.floor(TEX_SIZE * 0.55);
+    const handleTop = bladeBottom;
+    const handleBottom = Math.floor(TEX_SIZE * 0.75);
+    
+    for (let y = 0; y < TEX_SIZE; y++) {
+      for (let x = 0; x < TEX_SIZE; x++) {
+        const idx = (y * TEX_SIZE + x) * 4;
+        
+        // Blade section (metallic silver)
+        if (y >= bladeTop && y < bladeBottom) {
+          const halfWidth = Math.floor((bladeBottom - y) / (bladeBottom - bladeTop) * 4) + 1;
+          if (x >= centerX - halfWidth && x <= centerX + halfWidth) {
+            data[idx] = 160;      // R - metallic silver
+            data[idx + 1] = 160;  // G
+            data[idx + 2] = 170;  // B
+            data[idx + 3] = 255;  // A
+            
+            // Blood groove
+            if (x === centerX && y > bladeTop + 4) {
+              data[idx] = 100;
+              data[idx + 1] = 100;
+              data[idx + 2] = 110;
+            }
+            
+            // Edge highlight
+            if (x === centerX - halfWidth) {
+              data[idx] = 200;
+              data[idx + 1] = 200;
+              data[idx + 2] = 210;
+            }
+          }
+        }
+        
+        // Handle section (brown wood with grip)
+        if (y >= handleTop && y < handleBottom) {
+          const halfWidth = 4;
+          if (x >= centerX - halfWidth && x <= centerX + halfWidth) {
+            data[idx] = 90;       // R - brown wood
+            data[idx + 1] = 58;   // G
+            data[idx + 2] = 32;   // B
+            data[idx + 3] = 255;  // A
+            
+            // Grip grooves
+            if ((y - handleTop) % 4 < 2) {
+              data[idx] = 60;
+              data[idx + 1] = 40;
+              data[idx + 2] = 24;
+            }
+          }
+        }
+        
+        // Pommel (metal cap at bottom)
+        if (y >= handleBottom && y < handleBottom + 4) {
+          if (x >= centerX - 5 && x <= centerX + 5) {
+            data[idx] = 100;
+            data[idx + 1] = 100;
+            data[idx + 2] = 110;
+            data[idx + 3] = 255;
+          }
+        }
+      }
+    }
+  } else if (key.includes('pistol')) {
+    // Classic pistol - horizontal orientation
+    const centerY = Math.floor(TEX_SIZE / 2) + 10;
+    const barrelLeft = Math.floor(TEX_SIZE * 0.3);
+    const barrelRight = Math.floor(TEX_SIZE * 0.6);
+    const gripTop = centerY;
+    const gripBottom = Math.floor(TEX_SIZE * 0.75);
+    
+    for (let y = 0; y < TEX_SIZE; y++) {
+      for (let x = 0; x < TEX_SIZE; x++) {
+        const idx = (y * TEX_SIZE + x) * 4;
+        
+        // Barrel/slide (dark metal)
+        if (y >= centerY - 6 && y < centerY + 6 && x >= barrelLeft && x < barrelRight) {
+          data[idx] = 58;       // R
+          data[idx + 1] = 58;   // G
+          data[idx + 2] = 68;   // B
+          data[idx + 3] = 255;  // A
+          
+          // Top highlight
+          if (y === centerY - 6) {
+            data[idx] = 80;
+            data[idx + 1] = 80;
+            data[idx + 2] = 90;
+          }
+        }
+        
+        // Frame below barrel
+        if (y >= centerY + 6 && y < centerY + 12 && x >= barrelLeft + 4 && x < barrelRight - 2) {
+          data[idx] = 58;
+          data[idx + 1] = 58;
+          data[idx + 2] = 68;
+          data[idx + 3] = 255;
+        }
+        
+        // Trigger guard
+        if (y >= centerY + 12 && y < centerY + 18 && x >= barrelLeft + 8 && x < barrelLeft + 16) {
+          if (y >= centerY + 14 || x <= barrelLeft + 10 || x >= barrelLeft + 14) {
+            data[idx] = 40;
+            data[idx + 1] = 40;
+            data[idx + 2] = 50;
+            data[idx + 3] = 255;
+          }
+        }
+        
+        // Grip (brown wood)
+        if (y >= gripTop && y < gripBottom && x >= barrelLeft + 2 && x < barrelLeft + 18) {
+          data[idx] = 106;      // R
+          data[idx + 1] = 68;   // G
+          data[idx + 2] = 32;   // B
+          data[idx + 3] = 255;  // A
+          
+          // Grip texture
+          if ((y - gripTop) % 4 < 2) {
+            data[idx] = 74;
+            data[idx + 1] = 48;
+            data[idx + 2] = 24;
+          }
+        }
+      }
+    }
+  } else if (key.includes('revolver')) {
+    // Heavy revolver
+    const centerY = Math.floor(TEX_SIZE / 2) + 5;
+    const barrelLeft = Math.floor(TEX_SIZE * 0.25);
+    const barrelRight = Math.floor(TEX_SIZE * 0.55);
+    
+    for (let y = 0; y < TEX_SIZE; y++) {
+      for (let x = 0; x < TEX_SIZE; x++) {
+        const idx = (y * TEX_SIZE + x) * 4;
+        
+        // Barrel
+        if (y >= centerY - 6 && y < centerY + 6 && x >= barrelLeft && x < barrelRight) {
+          data[idx] = 64;
+          data[idx + 1] = 64;
+          data[idx + 2] = 74;
+          data[idx + 3] = 255;
+        }
+        
+        // Cylinder
+        if (y >= centerY - 8 && y < centerY + 8 && x >= barrelRight && x < barrelRight + 16) {
+          data[idx] = 64;
+          data[idx + 1] = 64;
+          data[idx + 2] = 74;
+          data[idx + 3] = 255;
+        }
+        
+        // Frame and grip
+        if (y >= centerY + 6 && y < centerY + 22 && x >= barrelLeft + 4 && x < barrelLeft + 20) {
+          data[idx] = 90;
+          data[idx + 1] = 58;
+          data[idx + 2] = 24;
+          data[idx + 3] = 255;
+        }
+      }
+    }
+  } else if (key.includes('tommygun') || key.includes('smg')) {
+    // Tommy gun / SMG
+    const centerY = Math.floor(TEX_SIZE / 2);
+    const barrelLeft = Math.floor(TEX_SIZE * 0.2);
+    const barrelRight = Math.floor(TEX_SIZE * 0.65);
+    
+    for (let y = 0; y < TEX_SIZE; y++) {
+      for (let x = 0; x < TEX_SIZE; x++) {
+        const idx = (y * TEX_SIZE + x) * 4;
+        
+        // Main body/barrel
+        if (y >= centerY - 5 && y < centerY + 5 && x >= barrelLeft && x < barrelRight) {
+          data[idx] = 50;
+          data[idx + 1] = 50;
+          data[idx + 2] = 60;
+          data[idx + 3] = 255;
+        }
+        
+        // Magazine (below barrel)
+        if (y >= centerY + 5 && y < centerY + 20 && x >= barrelLeft + 10 && x < barrelLeft + 22) {
+          data[idx] = 40;
+          data[idx + 1] = 40;
+          data[idx + 2] = 50;
+          data[idx + 3] = 255;
+        }
+        
+        // Stock
+        if (y >= centerY - 3 && y < centerY + 7 && x >= barrelLeft - 12 && x < barrelLeft) {
+          data[idx] = 90;
+          data[idx + 1] = 58;
+          data[idx + 2] = 32;
+          data[idx + 3] = 255;
+        }
+      }
+    }
+  } else if (key.includes('shotgun')) {
+    // Shotgun
+    const centerY = Math.floor(TEX_SIZE / 2) + 8;
+    const barrelLeft = Math.floor(TEX_SIZE * 0.25);
+    const barrelRight = Math.floor(TEX_SIZE * 0.7);
+    
+    for (let y = 0; y < TEX_SIZE; y++) {
+      for (let x = 0; x < TEX_SIZE; x++) {
+        const idx = (y * TEX_SIZE + x) * 4;
+        
+        // Double barrels
+        if (y >= centerY - 6 && y < centerY - 2 && x >= barrelLeft && x < barrelRight) {
+          data[idx] = 50;
+          data[idx + 1] = 50;
+          data[idx + 2] = 60;
+          data[idx + 3] = 255;
+        }
+        if (y >= centerY - 2 && y < centerY + 2 && x >= barrelLeft && x < barrelRight) {
+          data[idx] = 50;
+          data[idx + 1] = 50;
+          data[idx + 2] = 60;
+          data[idx + 3] = 255;
+        }
+        
+        // Stock
+        if (y >= centerY - 4 && y < centerY + 8 && x >= barrelLeft - 14 && x < barrelLeft) {
+          data[idx] = 90;
+          data[idx + 1] = 58;
+          data[idx + 2] = 32;
+          data[idx + 3] = 255;
+        }
+        
+        // Pump grip
+        if (y >= centerY + 2 && y < centerY + 10 && x >= barrelLeft + 8 && x < barrelLeft + 20) {
+          data[idx] = 60;
+          data[idx + 1] = 40;
+          data[idx + 2] = 24;
+          data[idx + 3] = 255;
+        }
+      }
+    }
+  } else if (key.includes('sniper')) {
+    // Sniper rifle
+    const centerY = Math.floor(TEX_SIZE / 2);
+    const barrelLeft = Math.floor(TEX_SIZE * 0.15);
+    const barrelRight = Math.floor(TEX_SIZE * 0.75);
+    
+    for (let y = 0; y < TEX_SIZE; y++) {
+      for (let x = 0; x < TEX_SIZE; x++) {
+        const idx = (y * TEX_SIZE + x) * 4;
+        
+        // Long barrel
+        if (y >= centerY - 4 && y < centerY + 4 && x >= barrelLeft && x < barrelRight) {
+          data[idx] = 40;
+          data[idx + 1] = 40;
+          data[idx + 2] = 50;
+          data[idx + 3] = 255;
+        }
+        
+        // Scope on top
+        if (y >= centerY - 10 && y < centerY - 4 && x >= barrelLeft + 20 && x < barrelLeft + 45) {
+          data[idx] = 30;
+          data[idx + 1] = 30;
+          data[idx + 2] = 40;
+          data[idx + 3] = 255;
+        }
+        
+        // Stock
+        if (y >= centerY - 2 && y < centerY + 8 && x >= barrelLeft - 15 && x < barrelLeft) {
+          data[idx] = 90;
+          data[idx + 1] = 58;
+          data[idx + 2] = 32;
+          data[idx + 3] = 255;
+        }
+      }
+    }
+  } else {
+    // Generic fallback - simple dark rectangle
+    const centerX = Math.floor(TEX_SIZE / 2);
+    for (let y = 0; y < TEX_SIZE; y++) {
+      for (let x = 0; x < TEX_SIZE; x++) {
+        const idx = (y * TEX_SIZE + x) * 4;
+        if (Math.abs(x - centerX) < 6 && y > TEX_SIZE / 4 && y < TEX_SIZE * 0.75) {
+          data[idx] = 64;
+          data[idx + 1] = 64;
+          data[idx + 2] = 72;
+          data[idx + 3] = 255;
+        }
       }
     }
   }
+  
   spriteCache.set(key, data);
 }
 
