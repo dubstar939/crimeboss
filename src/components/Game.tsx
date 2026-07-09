@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { GameEngine } from '../game/engine';
+import { RENDER_WIDTH, RENDER_HEIGHT } from '../game/types';
 
 export default function Game() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -26,7 +27,13 @@ export default function Game() {
       <canvas
         ref={canvasRef}
         className="max-w-full max-h-full"
-        style={{ imageRendering: 'pixelated' }}
+        style={{ 
+          imageRendering: 'pixelated' as any,
+          aspectRatio: `${RENDER_WIDTH} / ${RENDER_HEIGHT}`,
+          maxWidth: '100%',
+          maxHeight: '100%',
+          objectFit: 'contain'
+        }}
       />
     </div>
   );
