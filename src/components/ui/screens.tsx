@@ -13,7 +13,7 @@ export function MainMenu({ onStartGame, onContinueGame, onOptions, hasSave }: Ma
   const [showControls, setShowControls] = useState(false);
 
   return (
-    <div className="relative w-full h-full bg-gradient-to-b from-gray-900 via-red-950 to-black flex flex-col items-center justify-center">
+    <div className="relative w-full h-full bg-gradient-to-b from-gray-900 via-red-950 to-black flex flex-col items-center justify-center" role="main" aria-label="Main Menu">
       {/* Title */}
       <div className="absolute top-0 left-0 right-0 p-8 text-center">
         <h1 className="text-6xl md:text-8xl font-black text-white mb-2 tracking-tighter drop-shadow-lg" style={{ fontFamily: 'Impact, sans-serif' }}>
@@ -26,74 +26,74 @@ export function MainMenu({ onStartGame, onContinueGame, onOptions, hasSave }: Ma
       </div>
 
       {/* Menu Items */}
-      <div className="flex flex-col gap-4 z-10">
-        <Button size="lg" onClick={onStartGame} className="min-w-[280px]">
+      <nav className="flex flex-col gap-4 z-10" aria-label="Main menu navigation">
+        <Button size="lg" onClick={onStartGame} className="min-w-[280px]" ariaLabel="Start a new game">
           New Game
         </Button>
         
         {hasSave && (
-          <Button size="lg" variant="secondary" onClick={onContinueGame} className="min-w-[280px]">
+          <Button size="lg" variant="secondary" onClick={onContinueGame} className="min-w-[280px]" ariaLabel="Continue your saved game">
             Continue Game
           </Button>
         )}
         
-        <Button size="lg" variant="secondary" onClick={onOptions} className="min-w-[280px]">
+        <Button size="lg" variant="secondary" onClick={onOptions} className="min-w-[280px]" ariaLabel="Open game options and settings">
           Options
         </Button>
         
-        <Button size="md" variant="secondary" onClick={() => setShowControls(true)} className="min-w-[280px]">
+        <Button size="md" variant="secondary" onClick={() => setShowControls(true)} className="min-w-[280px]" ariaLabel="View game controls">
           Controls
         </Button>
-      </div>
+      </nav>
 
       {/* Footer */}
-      <div className="absolute bottom-8 text-center text-gray-500 font-mono text-xs">
+      <footer className="absolute bottom-8 text-center text-gray-500 font-mono text-xs">
         <p>© 2024 Little Italy Games</p>
         <p className="mt-1">Built with Wolf3D-style Raycasting Engine</p>
-      </div>
+      </footer>
 
       {/* Controls Modal */}
       {showControls && (
-        <Modal title="Controls" onClose={() => setShowControls(false)}>
+        <Modal title="Controls" onClose={() => setShowControls(false)} ariaLabel="Game controls reference">
           <div className="space-y-3 text-white font-mono text-sm">
-            <div className="grid grid-cols-2 gap-2">
-              <span className="text-gray-400">Move Forward</span>
+            <div className="grid grid-cols-2 gap-2" role="list" aria-label="Control mappings">
+              <span className="text-gray-400" role="listitem">Move Forward</span>
               <span className="text-right">W / ↑</span>
               
-              <span className="text-gray-400">Move Backward</span>
+              <span className="text-gray-400" role="listitem">Move Backward</span>
               <span className="text-right">S / ↓</span>
               
-              <span className="text-gray-400">Strafe Left</span>
+              <span className="text-gray-400" role="listitem">Strafe Left</span>
               <span className="text-right">A / ←</span>
               
-              <span className="text-gray-400">Strafe Right</span>
+              <span className="text-gray-400" role="listitem">Strafe Right</span>
               <span className="text-right">D / →</span>
               
-              <span className="text-gray-400">Sprint</span>
+              <span className="text-gray-400" role="listitem">Sprint</span>
               <span className="text-right">Shift</span>
               
-              <span className="text-gray-400">Crouch</span>
+              <span className="text-gray-400" role="listitem">Crouch</span>
               <span className="text-right">Ctrl</span>
               
-              <span className="text-gray-400">Fire</span>
+              <span className="text-gray-400" role="listitem">Fire</span>
               <span className="text-right">Left Click</span>
               
-              <span className="text-gray-400">Reload</span>
+              <span className="text-gray-400" role="listitem">Reload</span>
               <span className="text-right">R</span>
               
-              <span className="text-gray-400">Next Weapon</span>
+              <span className="text-gray-400" role="listitem">Next Weapon</span>
               <span className="text-right">Scroll / Q</span>
               
-              <span className="text-gray-400">Previous Weapon</span>
+              <span className="text-gray-400" role="listitem">Previous Weapon</span>
               <span className="text-right">Scroll / E</span>
               
-              <span className="text-gray-400">Pause</span>
+              <span className="text-gray-400" role="listitem">Pause</span>
               <span className="text-right">Escape</span>
               
-              <span className="text-gray-400">Minimap</span>
+              <span className="text-gray-400" role="listitem">Minimap</span>
               <span className="text-right">M</span>
               
-              <span className="text-gray-400">Debug Info</span>
+              <span className="text-gray-400" role="listitem">Debug Info</span>
               <span className="text-right">F3</span>
             </div>
           </div>
@@ -112,18 +112,18 @@ interface PauseMenuProps {
 
 export function PauseMenu({ onResume, onRestartLevel, onOptions, onQuitToMenu }: PauseMenuProps) {
   return (
-    <div className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-center justify-center">
-      <div className="bg-gray-900 border-2 border-red-800 rounded-lg shadow-2xl p-8 min-w-[320px]">
-        <h2 className="text-3xl font-bold text-white mb-6 text-center font-mono uppercase tracking-wider">
+    <div className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-center justify-center" role="dialog" aria-label="Pause menu" aria-modal="true">
+      <div className="bg-gray-900 border-2 border-red-800 rounded-lg shadow-2xl p-8 min-w-[320px]" role="document">
+        <h2 className="text-3xl font-bold text-white mb-6 text-center font-mono uppercase tracking-wider" id="pause-title">
           Paused
         </h2>
         
-        <div className="flex flex-col gap-3">
-          <Button size="md" onClick={onResume}>Resume</Button>
-          <Button size="md" variant="secondary" onClick={onRestartLevel}>Restart Level</Button>
-          <Button size="md" variant="secondary" onClick={onOptions}>Options</Button>
-          <Button size="md" variant="danger" onClick={onQuitToMenu}>Quit to Main Menu</Button>
-        </div>
+        <nav className="flex flex-col gap-3" aria-label="Pause menu options">
+          <Button size="md" onClick={onResume} ariaLabel="Resume game">Resume</Button>
+          <Button size="md" variant="secondary" onClick={onRestartLevel} ariaLabel="Restart current level">Restart Level</Button>
+          <Button size="md" variant="secondary" onClick={onOptions} ariaLabel="Open options menu">Options</Button>
+          <Button size="md" variant="danger" onClick={onQuitToMenu} ariaLabel="Quit to main menu">Quit to Main Menu</Button>
+        </nav>
       </div>
     </div>
   );
@@ -146,11 +146,11 @@ export function OptionsMenu({ settings, onSave, onClose }: OptionsMenuProps) {
   };
 
   return (
-    <Modal title="Options" onClose={handleSave}>
-      <div className="space-y-6">
+    <Modal title="Options" onClose={handleSave} ariaLabel="Game settings and options">
+      <div className="space-y-6" role="form" aria-label="Settings form">
         {/* Audio Settings */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-bold text-white font-mono uppercase border-b border-gray-700 pb-2">
+        <section aria-labelledby="audio-settings-title" className="space-y-4">
+          <h3 id="audio-settings-title" className="text-lg font-bold text-white font-mono uppercase border-b border-gray-700 pb-2">
             Audio
           </h3>
           
@@ -161,6 +161,7 @@ export function OptionsMenu({ settings, onSave, onClose }: OptionsMenuProps) {
             max={1}
             onChange={(v) => setLocalSettings({ ...localSettings, masterVolume: v })}
             formatValue={(v) => `${Math.round(v * 100)}%`}
+            ariaLabel="Adjust master volume"
           />
           
           <Slider
@@ -170,6 +171,7 @@ export function OptionsMenu({ settings, onSave, onClose }: OptionsMenuProps) {
             max={1}
             onChange={(v) => setLocalSettings({ ...localSettings, sfxVolume: v })}
             formatValue={(v) => `${Math.round(v * 100)}%`}
+            ariaLabel="Adjust sound effects volume"
           />
           
           <Slider
@@ -179,12 +181,13 @@ export function OptionsMenu({ settings, onSave, onClose }: OptionsMenuProps) {
             max={1}
             onChange={(v) => setLocalSettings({ ...localSettings, musicVolume: v })}
             formatValue={(v) => `${Math.round(v * 100)}%`}
+            ariaLabel="Adjust music volume"
           />
-        </div>
+        </section>
 
         {/* Graphics Settings */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-bold text-white font-mono uppercase border-b border-gray-700 pb-2">
+        <section aria-labelledby="graphics-settings-title" className="space-y-4">
+          <h3 id="graphics-settings-title" className="text-lg font-bold text-white font-mono uppercase border-b border-gray-700 pb-2">
             Graphics
           </h3>
           
@@ -196,6 +199,7 @@ export function OptionsMenu({ settings, onSave, onClose }: OptionsMenuProps) {
             step={0.1}
             onChange={(v) => setLocalSettings({ ...localSettings, mouseSensitivity: v })}
             formatValue={(v) => v.toFixed(1)}
+            ariaLabel="Adjust mouse sensitivity"
           />
           
           <Slider
@@ -206,28 +210,31 @@ export function OptionsMenu({ settings, onSave, onClose }: OptionsMenuProps) {
             step={1}
             onChange={(v) => setLocalSettings({ ...localSettings, renderDistance: Math.round(v) })}
             formatValue={(v) => `${Math.round(v)} tiles`}
+            ariaLabel="Adjust render distance"
           />
           
           <div className="flex items-center justify-between">
-            <label className="text-white font-mono text-sm">Graphics Quality</label>
+            <label htmlFor="graphics-quality-select" className="text-white font-mono text-sm">Graphics Quality</label>
             <select
+              id="graphics-quality-select"
               value={localSettings.graphicsQuality}
               onChange={(e) => setLocalSettings({ 
                 ...localSettings, 
                 graphicsQuality: e.target.value as 'low' | 'medium' | 'high' 
               })}
-              className="bg-gray-800 text-white font-mono text-sm px-3 py-2 rounded border border-gray-700 focus:outline-none focus:border-red-600"
+              className="bg-gray-800 text-white font-mono text-sm px-3 py-2 rounded border border-gray-700 focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-500"
+              aria-label="Select graphics quality level"
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
             </select>
           </div>
-        </div>
+        </section>
 
         {/* Display Settings */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-bold text-white font-mono uppercase border-b border-gray-700 pb-2">
+        <section aria-labelledby="display-settings-title" className="space-y-4">
+          <h3 id="display-settings-title" className="text-lg font-bold text-white font-mono uppercase border-b border-gray-700 pb-2">
             Display
           </h3>
           
@@ -235,18 +242,20 @@ export function OptionsMenu({ settings, onSave, onClose }: OptionsMenuProps) {
             label="Show Minimap"
             checked={showMinimap}
             onChange={setShowMinimap}
+            ariaLabel="Toggle minimap visibility"
           />
           
           <Toggle
             label="Show Debug Info"
             checked={showDebug}
             onChange={setShowDebug}
+            ariaLabel="Toggle debug information display"
           />
-        </div>
+        </section>
 
         {/* Save Button */}
         <div className="pt-4 border-t border-gray-700">
-          <Button onClick={handleSave} className="w-full">
+          <Button onClick={handleSave} className="w-full" ariaLabel="Save settings and close">
             Save Settings
           </Button>
         </div>
