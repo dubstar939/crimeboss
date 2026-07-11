@@ -242,7 +242,9 @@ export class GameEngine {
     const level = LEVELS[idx]!;
     this.map = parseMap(level);
 
-    this.player = new PlayerController(level.playerStart.x, level.playerStart.y, level.playerAngle);
+    // Ensure playerAngle exists, default to 0 if missing
+    const startAngle = typeof level.playerAngle === 'number' ? level.playerAngle : 0;
+    this.player = new PlayerController(level.playerStart.x, level.playerStart.y, startAngle);
 
     this.enemyAI.clear();
     for (const enemy of level.enemies) {
