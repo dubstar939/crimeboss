@@ -43,9 +43,10 @@ export class PlayerController {
   addWeapon(def: WeaponDef) {
     // Check if already have this weapon
     if (this.state.weapons.find((w) => w.id === def.id)) return;
+    const hasInfiniteAmmo = !Number.isFinite(def.ammoCapacity);
     const ws: WeaponState = {
       ...def,
-      currentAmmo: def.ammoCapacity === Infinity ? Infinity : def.ammoCapacity,
+      currentAmmo: hasInfiniteAmmo ? Infinity : def.ammoCapacity,
       isReloading: false,
       reloadTimer: 0,
       fireTimer: 0,
@@ -87,7 +88,7 @@ export class PlayerController {
 
   addAmmo(weaponId: string, amount: number) {
     const w = this.state.weapons.find((w) => w.id === weaponId);
-    if (w && w.ammoCapacity !== Infinity) {
+    if (w && Number.isFinite(w.ammoCapacity)) {
       w.currentAmmo = Math.min(w.ammoCapacity, w.currentAmmo + amount);
     }
   }
@@ -156,7 +157,7 @@ export class PlayerController {
     }
 
     // Reload key
-    if (keys.has('KeyR') && !weapon.isReloading && weapon.ammoCapacity !== Infinity && weapon.currentAmmo < weapon.ammoCapacity) {
+    if (keys.has('KeyR') && !weapon.isReloading && Number.isFinite(weapon.ammoCapacity) && weapon.currentAmmo < weapon.ammoCapacity) {
       weapon.isReloading = true;
       weapon.reloadTimer = weapon.reloadTime;
       audio.playReload();
@@ -173,8 +174,8 @@ export class PlayerController {
     // Shooting
     const mouseDown = keys.has('Mouse0');
     if ((mouseDown || keys.has('Space')) && !weapon.isReloading && weapon.fireTimer <= 0) {
-      if (weapon.currentAmmo > 0 || weapon.ammoCapacity === Infinity) {
-        if (weapon.ammoCapacity !== Infinity) {
+      if (weapon.currentAmmo > 0 || !Number.isFinite(weapon.ammoCapacity)) {
+        if (Number.isFinite(weapon.ammoCapacity)) {
           weapon.currentAmmo--;
         }
         weapon.fireTimer = 1 / weapon.fireRate;

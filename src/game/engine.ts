@@ -488,7 +488,7 @@ export class GameEngine {
       } else if (item.type === ItemType.AMMO) {
         item.collected = true;
         for (const weapon of player.weapons) {
-          if (weapon.ammoCapacity !== Infinity) {
+          if (Number.isFinite(weapon.ammoCapacity)) {
             weapon.currentAmmo = Math.min(weapon.ammoCapacity, weapon.currentAmmo + item.value);
           }
         }
@@ -923,8 +923,9 @@ export class GameEngine {
     this.ctx.fillStyle = '#ffffff';
     this.ctx.fillText('AMMO', RENDER_WIDTH - 10, RENDER_HEIGHT - 33);
     this.ctx.font = 'bold 18px monospace';
-    this.ctx.fillStyle = weapon.ammoCapacity === Infinity || weapon.currentAmmo > 0 ? '#ffffff' : '#d23c3c';
-    this.ctx.fillText(weapon.ammoCapacity === Infinity ? '∞' : `${weapon.currentAmmo}`, RENDER_WIDTH - 10, RENDER_HEIGHT - 14);
+    const hasInfiniteAmmo = !Number.isFinite(weapon.ammoCapacity);
+    this.ctx.fillStyle = hasInfiniteAmmo || weapon.currentAmmo > 0 ? '#ffffff' : '#d23c3c';
+    this.ctx.fillText(hasInfiniteAmmo ? '∞' : `${weapon.currentAmmo}`, RENDER_WIDTH - 10, RENDER_HEIGHT - 14);
 
     this.ctx.textAlign = 'center';
     this.ctx.font = 'bold 12px monospace';
