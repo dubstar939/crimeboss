@@ -216,6 +216,14 @@ export class GameEngine {
     this.audio.resume();
     this.currentLevelIdx = Math.min(this.completedLevels.length, LEVELS.length - 1);
     this.screen = GameScreen.BRIEFING;
+    // Load the level and restore player state from save
+    this.loadLevel(this.currentLevelIdx);
+    // Auto-start game after briefing delay
+    setTimeout(() => {
+      if (this.screen === GameScreen.BRIEFING) {
+        this.screen = GameScreen.PLAYING;
+      }
+    }, 2000);
   }
 
   nextLevel() {
