@@ -55,7 +55,11 @@ export function castRay(
 ): RayHit {
   let mapX = Math.floor(posX);
   let mapY = Math.floor(posY);
+  
+  const mapHeight = map.length;
+  const mapWidth = map[0]?.length || 0;
 
+  // Pre-calculate delta distances with bounds checking
   const deltaDistX = rayDirX === 0 ? 1e30 : Math.abs(1 / rayDirX);
   const deltaDistY = rayDirY === 0 ? 1e30 : Math.abs(1 / rayDirY);
 
@@ -96,10 +100,11 @@ export function castRay(
       side = 1;
     }
 
-    if (mapY < 0 || mapY >= map.length || mapX < 0 || mapX >= map[0]?.length) {
+    // Optimized bounds check
+    if (mapY < 0 || mapY >= mapHeight || mapX < 0 || mapX >= mapWidth) {
       hit = true;
       wallType = WallType.RED_BRICK;
-    } else if (map[mapY]?.[mapX] !== WallType.EMPTY) {
+    } else if (map[mapY][mapX] !== WallType.EMPTY) {
       hit = true;
       wallType = map[mapY][mapX] as WallType;
     }
