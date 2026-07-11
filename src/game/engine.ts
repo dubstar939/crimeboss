@@ -592,6 +592,9 @@ export class GameEngine {
     const rayDirX1 = camera.dirX + camera.planeX;
     const rayDirY1 = camera.dirY + camera.planeY;
 
+    // Pre-calculate step increments
+    const widthInv = 1 / RENDER_WIDTH;
+    
     for (let y = 0; y < RENDER_HEIGHT; y++) {
       const isFloor = y > horizon;
       const p = isFloor ? y - horizon : horizon - y;
@@ -600,25 +603,31 @@ export class GameEngine {
       const rowDistance = (CAMERA_HEIGHT_TILES * camera.projectionPlaneDistance) / p;
       if (rowDistance > this.settings.renderDistance + 1) continue;
 
-      const stepX = (rowDistance * (rayDirX1 - rayDirX0)) / RENDER_WIDTH;
-      const stepY = (rowDistance * (rayDirY1 - rayDirY0)) / RENDER_WIDTH;
+      const stepX = (rowDistance * (rayDirX1 - rayDirX0)) * widthInv;
+      const stepY = (rowDistance * (rayDirY1 - rayDirY0)) * widthInv;
       let worldX = state.x + rowDistance * rayDirX0;
       let worldY = state.y + rowDistance * rayDirY0;
       const light = Math.max(0.28, 1 - rowDistance / this.settings.renderDistance);
       const tex = isFloor ? floorTex : ceilTex;
       const shade = isFloor ? 1 : 0.72;
+      
+      // Pre-multiply light and shade
+      const lightShade = light * shade;
 
+      // Cache row offset to avoid repeated multiplication
+      const rowOffset = y * RENDER_WIDTH * 4;
+      
       for (let x = 0; x < RENDER_WIDTH; x++) {
         const fracX = ((worldX % 1) + 1) % 1;
         const fracY = ((worldY % 1) + 1) % 1;
         const tx = Math.min(TEX_SIZE - 1, Math.floor(fracX * TEX_SIZE));
         const ty = Math.min(TEX_SIZE - 1, Math.floor(fracY * TEX_SIZE));
         const texIdx = (ty * TEX_SIZE + tx) * 4;
-        const idx = (y * RENDER_WIDTH + x) * 4;
 
-        this.pixels[idx] = Math.floor(tex[texIdx] * light * shade);
-        this.pixels[idx + 1] = Math.floor(tex[texIdx + 1] * light * shade);
-        this.pixels[idx + 2] = Math.floor(tex[texIdx + 2] * light * shade);
+        const idx = rowOffset + x * 4;
+        this.pixels[idx] = Math.floor(tex[texIdx] * lightShade);
+        this.pixels[idx + 1] = Math.floor(tex[texIdx + 1] * lightShade);
+        this.pixels[idx + 2] = Math.floor(tex[texIdx + 2] * lightShade);
         this.pixels[idx + 3] = 255;
 
         worldX += stepX;
@@ -634,12 +643,16 @@ export class GameEngine {
     const camera = buildCameraBasis(state.angle);
     const horizon = this.getHorizonY();
     const sampleColumns = [Math.floor(RENDER_WIDTH * 0.2), Math.floor(RENDER_WIDTH * 0.5), Math.floor(RENDER_WIDTH * 0.8)];
+    
+    // Pre-calculate constants
+    const widthInv = 1 / RENDER_WIDTH;
+    const maxRenderDist = this.settings.renderDistance;
 
     for (let x = 0; x < RENDER_WIDTH; x++) {
-      const cameraX = (2 * x) / RENDER_WIDTH - 1;
+      const cameraX = 2 * x * widthInv - 1;
       const rayDirX = camera.dirX + camera.planeX * cameraX;
       const rayDirY = camera.dirY + camera.planeY * cameraX;
-      const hit = castRay(this.map, state.x, state.y, rayDirX, rayDirY, this.settings.renderDistance);
+      const hit = castRay(this.map, state.x, state.y, rayDirX, rayDirY, maxRenderDist);
 
       if (!hit.hit || hit.distance <= 0.0001) {
         this.depthBuffer[x] = Infinity;
@@ -658,12 +671,15 @@ export class GameEngine {
       const drawEnd = Math.min(RENDER_HEIGHT - 1, Math.ceil(bottom));
 
       const texture = getWallTexture(hit.wallType || WallType.RED_BRICK);
-      const light = Math.max(0.25, 1 - hit.distance / this.settings.renderDistance) * (hit.side === 1 ? 0.82 : 1);
+      const light = Math.max(0.25, 1 - hit.distance / maxRenderDist) * (hit.side === 1 ? 0.82 : 1);
+      
+      // Cache column offset
+      const colOffset = x * 4;
 
       for (let y = drawStart; y <= drawEnd; y++) {
         const texY = Math.min(TEX_SIZE - 1, Math.max(0, Math.floor(((y - top) / projectedHeight) * TEX_SIZE)));
         const texIdx = (texY * TEX_SIZE + hit.texX) * 4;
-        const idx = (y * RENDER_WIDTH + x) * 4;
+        const idx = y * RENDER_WIDTH * 4 + colOffset;
 
         this.pixels[idx] = Math.floor(texture[texIdx] * light);
         this.pixels[idx + 1] = Math.floor(texture[texIdx + 1] * light);
@@ -724,6 +740,8 @@ export class GameEngine {
     sprites.sort((a, b) => ((b.x - state.x) ** 2 + (b.y - state.y) ** 2) - ((a.x - state.x) ** 2 + (a.y - state.y) ** 2));
 
     const invDet = 1 / (camera.planeX * camera.dirY - camera.dirX * camera.planeY);
+    const maxRenderDist = this.settings.renderDistance;
+    const halfWidth = RENDER_WIDTH / 2;
 
     for (const sprite of sprites) {
       const spriteX = sprite.x - state.x;
@@ -731,9 +749,9 @@ export class GameEngine {
       const transformX = invDet * (camera.dirY * spriteX - camera.dirX * spriteY);
       const transformY = invDet * (-camera.planeY * spriteX + camera.planeX * spriteY);
 
-      if (transformY <= 0.05 || transformY > this.settings.renderDistance) continue;
+      if (transformY <= 0.05 || transformY > maxRenderDist) continue;
 
-      const spriteScreenX = Math.floor(RENDER_WIDTH / 2 * (1 + transformX / transformY));
+      const spriteScreenX = Math.floor(halfWidth * (1 + transformX / transformY));
       const distanceWorld = transformY * TILE_SIZE;
       const spriteHeight = Math.max(1, (sprite.heightUnits / distanceWorld) * camera.projectionPlaneDistance);
       const spriteWidth = Math.max(1, (sprite.widthUnits / distanceWorld) * camera.projectionPlaneDistance);
@@ -745,8 +763,12 @@ export class GameEngine {
       const drawEndX = Math.min(RENDER_WIDTH - 1, Math.ceil(right));
       const drawStartY = Math.max(0, Math.floor(top));
       const drawEndY = Math.min(RENDER_HEIGHT - 1, Math.ceil(bottom));
-      const light = Math.max(0.28, 1 - transformY / this.settings.renderDistance);
+      const light = Math.max(0.28, 1 - transformY / maxRenderDist);
       const hitFlash = sprite.hitFlash || 0;
+      
+      // Pre-calculate hit flash adjustments
+      const hitFlashR = hitFlash * 180;
+      const hitFlashGB = hitFlash * 70;
 
       for (let stripe = drawStartX; stripe <= drawEndX; stripe++) {
         if (transformY >= this.depthBuffer[stripe] - 0.0001) continue;
@@ -758,13 +780,13 @@ export class GameEngine {
           const alpha = sprite.tex[texIdx + 3];
           if (alpha < 20) continue;
 
-          const idx = (y * RENDER_WIDTH + stripe) * 4;
+          const idx = y * RENDER_WIDTH * 4 + stripe * 4;
           const r = sprite.tex[texIdx];
           const g = sprite.tex[texIdx + 1];
           const b = sprite.tex[texIdx + 2];
-          this.pixels[idx] = Math.min(255, Math.floor((r + hitFlash * 180) * light));
-          this.pixels[idx + 1] = Math.min(255, Math.floor((g + hitFlash * 70) * light));
-          this.pixels[idx + 2] = Math.min(255, Math.floor((b + hitFlash * 70) * light));
+          this.pixels[idx] = Math.min(255, Math.floor((r + hitFlashR) * light));
+          this.pixels[idx + 1] = Math.min(255, Math.floor((g + hitFlashGB) * light));
+          this.pixels[idx + 2] = Math.min(255, Math.floor((b + hitFlashGB) * light));
           this.pixels[idx + 3] = 255;
         }
       }
